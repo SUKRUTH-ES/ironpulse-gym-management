@@ -1,11 +1,12 @@
+import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { sqlOne } from '@/lib/db';
 import { mongo } from '@/lib/mongo';
-import { PageHeader, Card, Stat, Empty, BarList } from '@/components/ui';
+import { PageHeader, Card, Stat, Empty, BarList, Badge } from '@/components/ui';
 import { ColumnChart, LineChart } from '@/components/charts';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { WorkoutLogger } from './workout-logger';
-import { logWorkout, logBodyWeight } from '../actions';
+import { logWorkout, logBodyWeight, activatePlan, deleteOwnPlan } from '../actions';
 import { num, date, label, daysAgo } from '@/lib/format';
 
 export const metadata = { title: 'Workouts & progress' };
@@ -15,8 +16,8 @@ export default async function WorkoutsPage() {
     const db = mongo();
     const eightWeeksAgo = daysAgo(56);
 
-    const [plan, weekly, records, weights, recent] = await Promise.all([
-        db.collection('workout_plans').findOne({ memberId: me.member_id, status: 'active' }, { sort: { createdAt: -1 } }),
+    const [allPlans, weekly, records, weights, recent] = await Promise.all([
+        db.collection('workout_plans').find({ memberId: me.member_id }, { projection: { 'days.exercises': 0 } }).sort({ status: 1, createdAt: -1 }).toArray(),
 
         // Aggregation: training volume (reps x kg) and workouts per week
         db.collection('workout_logs').aggregate([
@@ -50,6 +51,8 @@ export default async function WorkoutsPage() {
         db.collection('body_metrics').find({ memberId: me.member_id }).sort({ recordedAt: -1 }).limit(16).toArray(),
         db.collection('workout_logs').find({ memberId: me.member_id }).sort({ performedAt: -1 }).limit(5).toArray(),
     ]);
+    const activeId = allPlans.find((p) => p.status === 'active')?._id;
+    const plan = activeId ? await db.collection('workout_plans').findOne({ _id: activeId }) : null;
     // the trainer's name lives in MySQL; the plan only stores their id
     const coach = plan?.trainerId
         ? await sqlOne('SELECT u.full_name FROM trainers t JOIN users u ON u.user_id = t.user_id WHERE t.trainer_id = ?', [plan.trainerId])
@@ -78,7 +81,9 @@ export default async function WorkoutsPage() {
 
     return (
         <>
-            <PageHeader title="Workouts & progress" subtitle="Your plan, your logs and how you are improving" />
+            <PageHeader title="Workouts & progress" subtitle="Your plan, your logs and how you are improving">
+                <Link href="/member/workouts/new" className="btn btn-primary">Create my own plan</Link>
+            </PageHeader>
 
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <Stat label="Workouts (8 weeks)" value={totalWorkouts} hint={`${(totalWorkouts / 8).toFixed(1)} per week`} />
@@ -107,9 +112,39 @@ export default async function WorkoutsPage() {
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
                 <Card title={plan ? plan.title : 'Workout plan'} subtitle={plan ? `${label(plan.goal)} · ${coach ? `by ${coach.full_name}` : 'self-made'}` : null} className="lg:col-span-2">
-                    {clientPlan ? <WorkoutLogger plan={clientPlan} action={logWorkout} /> : <Empty>No workout plan yet. Ask a trainer to make one for you.</Empty>}
+                    {clientPlan ? <WorkoutLogger plan={clientPlan} action={logWorkout} /> : (
+                        <Empty>No workout plan yet. <Link href="/member/workouts/new" className="text-teal-700 underline">Create your own</Link> or ask a trainer to make one for you.</Empty>
+                    )}
                 </Card>
                 <div className="space-y-6">
+                    <Card title="My plans" action={<Link href="/member/workouts/new" className="text-sm text-teal-700 hover:underline">+ New plan</Link>}>
+                        {allPlans.length ? (
+                            <ul className="divide-y divide-slate-100">
+                                {allPlans.map((p) => (
+                                    <li key={String(p._id)} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
+                                        <div className="min-w-0">
+                                            <p className="truncate font-medium">{p.title}</p>
+                                            <p className="text-xs text-slate-500">{p.trainerId ? 'From your trainer' : 'Made by you'} · {p.days.length} days · {date(p.createdAt)}</p>
+                                        </div>
+                                        {p.status === 'active' ? <Badge status="active" /> : (
+                                            <div className="flex gap-1">
+                                                <ActionForm action={activatePlan} inlineMessage>
+                                                    <input type="hidden" name="plan_id" value={String(p._id)} />
+                                                    <SubmitButton className="btn btn-secondary btn-sm">Use</SubmitButton>
+                                                </ActionForm>
+                                                {!p.trainerId && (
+                                                    <ActionForm action={deleteOwnPlan} inlineMessage>
+                                                        <input type="hidden" name="plan_id" value={String(p._id)} />
+                                                        <SubmitButton className="btn btn-danger btn-sm">Delete</SubmitButton>
+                                                    </ActionForm>
+                                                )}
+                                            </div>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : <Empty>No plans yet.</Empty>}
+                    </Card>
                     <Card title="Personal records">
                         {records.length ? <BarList rows={records.map((r) => ({ label: `${r._id} (${r.reps} reps)`, value: r.bestKg }))} format={(v) => `${v} kg`} /> : <Empty>No lifts logged yet.</Empty>}
                     </Card>

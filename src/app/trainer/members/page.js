@@ -14,7 +14,7 @@ export default async function TrainerMembers() {
 
     const [myPlans, exercises] = await Promise.all([
         db.collection('workout_plans').find({ trainerId: me.trainer_id, status: 'active' }).sort({ createdAt: -1 }).toArray(),
-        db.collection('exercises').find({}, { projection: { name: 1, slug: 1, category: 1, primaryMuscle: 1 } }).sort({ category: 1, name: 1 }).toArray(),
+        db.collection('exercises').find({ createdBy: null }, { projection: { name: 1, slug: 1, category: 1, primaryMuscle: 1 } }).sort({ category: 1, name: 1 }).toArray(),
     ]);
 
     // Members linked to me through PT sessions or plans (ids from both databases)

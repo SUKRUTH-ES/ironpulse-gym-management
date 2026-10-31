@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth';
 import { sql, sqlOne, callProcedure, dbErrorMessage } from '@/lib/db';
 import { mongo, toObjectId } from '@/lib/mongo';
@@ -173,4 +174,114 @@ export async function markNotificationsRead() {
     const me = await requireRole('member');
     await mongo().collection('notifications').updateMany({ userId: me.user_id, readAt: null }, { $set: { readAt: new Date() } });
     revalidatePath('/member');
+}
+
+// ---------------------------------------------------------------- self-made plans & exercises (MongoDB)
+const GOALS = ['weight_loss', 'muscle_gain', 'endurance', 'flexibility', 'general_fitness'];
+const CATEGORIES = ['strength', 'cardio', 'mobility', 'plyometric'];
+const LEVELS = ['beginner', 'intermediate', 'advanced'];
+
+// Exercises a member may use: the shared library plus the ones they added
+const visibleTo = (memberId) => ({ createdBy: { $in: [null, memberId] } });
+
+// Builds a plan without a trainer. The builder sends the whole plan as JSON.
+export async function createOwnPlan(prevState, formData) {
+    const me = await requireRole('member');
+    let input;
+    try {
+        input = JSON.parse(String(formData.get('plan') || '{}'));
+    } catch {
+        return { ok: false, message: 'Could not read the plan.' };
+    }
+    const title = String(input.title || '').trim();
+    if (title.length < 3 || title.length > 100) return { ok: false, message: 'Give the plan a title (3–100 characters).' };
+    if (!GOALS.includes(input.goal)) return { ok: false, message: 'Pick a goal.' };
+    const days = Array.isArray(input.days) ? input.days.filter((d) => d.items?.length) : [];
+    if (!days.length || days.length > 7) return { ok: false, message: 'Add exercises to 1–7 days.' };
+
+    const slugs = [...new Set(days.flatMap((d) => d.items.map((i) => String(i.slug))))];
+    const found = await mongo().collection('exercises').find({ slug: { $in: slugs }, ...visibleTo(me.member_id) }).toArray();
+    const bySlug = new Map(found.map((e) => [e.slug, e]));
+
+    const planDays = [];
+    for (const [index, d] of days.entries()) {
+        const exercises = [];
+        for (const item of d.items) {
+            const ex = bySlug.get(String(item.slug));
+            const sets = int(item.sets);
+            const reps = String(item.reps || '').trim().slice(0, 20);
+            if (!ex) return { ok: false, message: 'One of the exercises no longer exists.' };
+            if (!(sets >= 1 && sets <= 10)) return { ok: false, message: `${ex.name}: sets must be 1–10.` };
+            if (!reps) return { ok: false, message: `${ex.name}: enter reps, e.g. 10-12 or 30s.` };
+            exercises.push({ exerciseId: ex._id, name: ex.name, sets, reps, restSec: ex.category === 'strength' ? 90 : 45 });
+        }
+        planDays.push({ day: index + 1, title: String(d.title || '').trim().slice(0, 50) || `Day ${index + 1}`, exercises });
+    }
+
+    const now = new Date();
+    const db = mongo();
+    try {
+        await db.collection('workout_plans').updateMany({ memberId: me.member_id, status: 'active' }, { $set: { status: 'archived', updatedAt: now } });
+        await db.collection('workout_plans').insertOne({
+            memberId: me.member_id, trainerId: null, title, goal: input.goal, durationWeeks: 8,
+            status: 'active', days: planDays, createdAt: now, updatedAt: now,
+        });
+    } catch {
+        return { ok: false, message: 'The plan did not pass validation.' };
+    }
+    revalidatePath('/member/workouts');
+    redirect('/member/workouts');
+}
+
+// Make one of my plans the active one (only one plan is active at a time)
+export async function activatePlan(prevState, formData) {
+    const me = await requireRole('member');
+    const id = toObjectId(formData.get('plan_id'));
+    const db = mongo().collection('workout_plans');
+    const plan = id && (await db.findOne({ _id: id, memberId: me.member_id }));
+    if (!plan) return { ok: false, message: 'Plan not found.' };
+    const now = new Date();
+    await db.updateMany({ memberId: me.member_id, status: 'active' }, { $set: { status: 'archived', updatedAt: now } });
+    await db.updateOne({ _id: id }, { $set: { status: 'active', updatedAt: now } });
+    revalidatePath('/member/workouts');
+    return { ok: true, message: `${plan.title} is now your active plan.` };
+}
+
+// Members may delete only plans they made themselves; trainer plans stay
+export async function deleteOwnPlan(prevState, formData) {
+    const me = await requireRole('member');
+    const id = toObjectId(formData.get('plan_id'));
+    const res = id ? await mongo().collection('workout_plans').deleteOne({ _id: id, memberId: me.member_id, trainerId: null }) : { deletedCount: 0 };
+    revalidatePath('/member/workouts');
+    return res.deletedCount ? { ok: true, message: 'Plan deleted.' } : { ok: false, message: 'Only plans you made yourself can be deleted.' };
+}
+
+// Adds a private exercise to the library, visible only to this member
+export async function addCustomExercise(prevState, formData) {
+    const me = await requireRole('member');
+    const name = String(formData.get('name') || '').trim().slice(0, 60);
+    const category = String(formData.get('category'));
+    const level = String(formData.get('level'));
+    const primaryMuscle = String(formData.get('primaryMuscle') || '').trim().toLowerCase().slice(0, 40);
+    const equipment = String(formData.get('equipment') || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean).slice(0, 6);
+    const instructions = String(formData.get('instructions') || '').split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 10);
+
+    if (name.length < 2) return { ok: false, message: 'Give the exercise a name.' };
+    if (!CATEGORIES.includes(category) || !LEVELS.includes(level)) return { ok: false, message: 'Pick a type and level.' };
+    if (!primaryMuscle) return { ok: false, message: 'Which muscle does it work?' };
+    if (!instructions.length) return { ok: false, message: 'Add at least one instruction line.' };
+
+    const base = name.toLowerCase().replace(/'/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    try {
+        await mongo().collection('exercises').insertOne({
+            name, slug: `${base}-m${me.member_id}`, category, primaryMuscle, secondaryMuscles: [],
+            equipment: equipment.length ? equipment : ['bodyweight'], level, instructions, tags: ['custom'],
+            createdBy: me.member_id,
+        });
+    } catch (err) {
+        return { ok: false, message: err.code === 11000 ? 'You already added an exercise with that name.' : 'The exercise did not pass validation.' };
+    }
+    revalidatePath('/member/exercises');
+    revalidatePath('/member/workouts/new');
+    return { ok: true, message: `${name} added. You can now use it in your own plans.` };
 }

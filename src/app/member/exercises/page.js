@@ -1,5 +1,8 @@
+import { requireRole } from '@/lib/auth';
 import { mongo } from '@/lib/mongo';
 import { PageHeader, Card, Badge, Empty } from '@/components/ui';
+import { ActionForm, SubmitButton } from '@/components/forms';
+import { addCustomExercise } from '../actions';
 import { label, daysAgo } from '@/lib/format';
 
 export const metadata = { title: 'Exercise library' };
@@ -8,11 +11,13 @@ const LEVELS = ['beginner', 'intermediate', 'advanced'];
 const CATEGORIES = ['strength', 'cardio', 'mobility', 'plyometric'];
 
 export default async function ExercisesPage({ searchParams }) {
+    const me = await requireRole('member');
     const { q = '', level = '', category = '' } = await searchParams;
     const exercises = mongo().collection('exercises');
 
-    // $text uses the weighted text index (name > muscle > tags > instructions)
-    const filter = {};
+    // $text uses the weighted text index (name > muscle > tags > instructions).
+    // Shared exercises have no createdBy; private ones are shown only to their owner.
+    const filter = { createdBy: { $in: [null, me.member_id] } };
     if (q.trim()) filter.$text = { $search: q.trim() };
     if (LEVELS.includes(level)) filter.level = level;
     if (CATEGORIES.includes(category)) filter.category = category;
@@ -64,7 +69,10 @@ export default async function ExercisesPage({ searchParams }) {
                                 <Card key={String(e._id)}>
                                     <div className="mb-2 flex items-start justify-between gap-2">
                                         <p className="font-semibold">{e.name}</p>
-                                        <Badge status={{ beginner: 'low', intermediate: 'medium', advanced: 'high' }[e.level]}>{e.level}</Badge>
+                                        <span className="flex gap-1">
+                                            {e.createdBy != null && <Badge status="scheduled">mine</Badge>}
+                                            <Badge status={{ beginner: 'low', intermediate: 'medium', advanced: 'high' }[e.level]}>{e.level}</Badge>
+                                        </span>
                                     </div>
                                     <p className="text-sm text-teal-800">{label(e.primaryMuscle)}{e.secondaryMuscles?.length ? ` + ${e.secondaryMuscles.join(', ')}` : ''}</p>
                                     <p className="mt-1 text-xs text-slate-500">Equipment: {e.equipment.join(', ')}</p>
@@ -76,18 +84,39 @@ export default async function ExercisesPage({ searchParams }) {
                         </div>
                     ) : <Empty>No exercises match.</Empty>}
                 </div>
-                <Card title="Popular this month" subtitle="Most logged across the gym" className="h-fit">
-                    {popular.length ? (
-                        <ol className="space-y-2 text-sm">
-                            {popular.map((p, i) => (
-                                <li key={p._id} className="flex justify-between gap-2">
-                                    <span>{i + 1}. {p._id}</span>
-                                    <span className="text-slate-500 tabular-nums">{p.times}× · {p.members} members</span>
-                                </li>
-                            ))}
-                        </ol>
-                    ) : <Empty>No workouts logged yet.</Empty>}
-                </Card>
+                <div className="space-y-6">
+                    <Card title="Add your own exercise" subtitle="Only you can see it. Use it in plans you make yourself." className="scroll-mt-6">
+                        <ActionForm action={addCustomExercise} resetOnSuccess className="space-y-3">
+                            <div id="add"><label className="label" htmlFor="ex-name">Name</label><input id="ex-name" name="name" className="input" required maxLength={60} /></div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="label" htmlFor="ex-category">Type</label>
+                                    <select id="ex-category" name="category" className="input">{CATEGORIES.map((c) => <option key={c} value={c}>{label(c)}</option>)}</select>
+                                </div>
+                                <div>
+                                    <label className="label" htmlFor="ex-level">Level</label>
+                                    <select id="ex-level" name="level" className="input">{LEVELS.map((l) => <option key={l} value={l}>{label(l)}</option>)}</select>
+                                </div>
+                            </div>
+                            <div><label className="label" htmlFor="ex-muscle">Main muscle</label><input id="ex-muscle" name="primaryMuscle" className="input" placeholder="e.g. glutes" required maxLength={40} /></div>
+                            <div><label className="label" htmlFor="ex-equipment">Equipment</label><input id="ex-equipment" name="equipment" className="input" placeholder="e.g. dumbbell, bench" /></div>
+                            <div><label className="label" htmlFor="ex-steps">How to do it (one step per line)</label><textarea id="ex-steps" name="instructions" rows={3} className="input" required /></div>
+                            <SubmitButton className="btn btn-primary w-full">Add exercise</SubmitButton>
+                        </ActionForm>
+                    </Card>
+                    <Card title="Popular this month" subtitle="Most logged across the gym">
+                        {popular.length ? (
+                            <ol className="space-y-2 text-sm">
+                                {popular.map((p, i) => (
+                                    <li key={p._id} className="flex justify-between gap-2">
+                                        <span>{i + 1}. {p._id}</span>
+                                        <span className="text-slate-500 tabular-nums">{p.times}× · {p.members} members</span>
+                                    </li>
+                                ))}
+                            </ol>
+                        ) : <Empty>No workouts logged yet.</Empty>}
+                    </Card>
+                </div>
             </div>
         </>
     );

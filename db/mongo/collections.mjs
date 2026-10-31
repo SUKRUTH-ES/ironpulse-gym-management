@@ -46,12 +46,15 @@ export const collections = [
                     level: { enum: ['beginner', 'intermediate', 'advanced'] },
                     instructions: { bsonType: 'array', minItems: 1, items: { bsonType: 'string' } },
                     tags: { bsonType: 'array', items: { bsonType: 'string' } },
+                    // set only on a member's own private exercise (gym_db.members.member_id)
+                    createdBy: { bsonType: 'int' },
                 },
             },
         },
         indexes: [
             { key: { slug: 1 }, options: { unique: true, name: 'uq_slug' } },
             { key: { primaryMuscle: 1, level: 1 }, options: { name: 'muscle_level' } },
+            { key: { createdBy: 1 }, options: { name: 'by_creator' } },
             {
                 key: { name: 'text', primaryMuscle: 'text', tags: 'text', instructions: 'text' },
                 options: {

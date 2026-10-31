@@ -12,7 +12,7 @@ DBMS Level 3 mini project. A web app for running a gym: memberships and payments
 |---|---|
 | **Admin** | Dashboard (revenue, peak hours, renewals due, churn risk), front-desk check-in/out, members, selling plans, refunds, class timetable, plans, reports, audit log |
 | **Trainer** | Weekly schedule, confirm/decline/complete personal training, take class attendance, create workout plans for members |
-| **Member** | Book classes (or join the waitlist), cancel, buy/renew/freeze membership, request personal training (full-text trainer search), log workouts, see progress charts, search the exercise library |
+| **Member** | Book classes (or join the waitlist), cancel, buy/renew/freeze membership, request personal training (full-text trainer search), build their own workout plans without a trainer, add private exercises, log workouts, see progress charts, search the exercise library |
 
 ## Setup
 
