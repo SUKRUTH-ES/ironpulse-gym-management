@@ -18,6 +18,9 @@ export const time = (value) =>
 
 export const dateTime = (value) => (value ? `${dateShort(value)}, ${time(value)}` : '—');
 
+// "1 day", "3 days"
+export const plural = (n, word, many = `${word}s`) => `${n} ${Number(n) === 1 ? word : many}`;
+
 export const label = (s) => (s ? String(s).replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : '—');
 
 // "YYYY-MM-DD" for <input type="date"> in local time

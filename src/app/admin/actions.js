@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { requireRole } from '@/lib/auth';
 import { sql, sqlOne, callProcedure, transaction, dbErrorMessage } from '@/lib/db';
 import { notify } from '@/lib/notifications';
-import { inr } from '@/lib/format';
+import { inr, date, dateTime, plural, isoDay, daysAgo } from '@/lib/format';
 
 const fail = (err) => ({ ok: false, message: dbErrorMessage(err) });
 const int = (v) => Number.parseInt(String(v ?? ''), 10);
@@ -47,9 +47,9 @@ export async function sellMembership(prevState, formData) {
              JOIN membership_plans p ON p.plan_id = ms.plan_id
              JOIN members m ON m.member_id = ms.member_id JOIN users u ON u.user_id = m.user_id
              WHERE ms.membership_id = ?`, [out.membership_id]);
-        await notify(ms.user_id, 'general', `${ms.name} plan activated`, `Valid from ${ms.start_date} to ${ms.end_date}.`);
+        await notify(ms.user_id, 'general', `${ms.name} plan activated`, `Valid from ${date(ms.start_date)} to ${date(ms.end_date)}.`);
         revalidatePath(`/admin/members/${memberId}`);
-        return { ok: true, message: `${ms.name} sold for ${inr(ms.price)} — valid ${ms.start_date} to ${ms.end_date}.` };
+        return { ok: true, message: `${ms.name} sold for ${inr(ms.price)} — valid ${date(ms.start_date)} to ${date(ms.end_date)}.` };
     } catch (err) {
         return fail(err);
     }
@@ -75,9 +75,18 @@ export async function refundPayment(prevState, formData) {
             }
             return p;
         });
+        // Tell the member (after the commit; notifications live in MongoDB)
+        const who = await sqlOne(
+            `SELECT m.user_id, p.name AS plan_name FROM payments pay
+             JOIN members m ON m.member_id = pay.member_id
+             LEFT JOIN memberships ms ON ms.membership_id = pay.membership_id
+             LEFT JOIN membership_plans p ON p.plan_id = ms.plan_id
+             WHERE pay.payment_id = ?`, [paymentId]);
+        await notify(who.user_id, 'general', `Refund of ${inr(result.amount)} processed`,
+            who.plan_name ? `Your ${who.plan_name} membership has been cancelled.` : 'Your personal training payment was refunded.');
         revalidatePath('/admin/payments');
         revalidatePath('/admin/members', 'layout');
-        return { ok: true, message: `Refunded ${inr(result.amount)}${result.membership_id ? ' and cancelled the membership' : ''}.` };
+        return { ok: true, message: `Refunded ${inr(result.amount)}${result.membership_id ? ' and cancelled the membership' : ''}. Member notified.` };
     } catch (err) {
         return fail(err);
     }
@@ -96,6 +105,10 @@ export async function setMemberActive(prevState, formData) {
 export async function createClassSession(prevState, formData) {
     await requireRole('admin');
     const f = Object.fromEntries(formData);
+    // The timetable (admin and member) shows the next 7 days, so classes are planned within it
+    if (!(f.date >= isoDay() && f.date <= isoDay(daysAgo(-7)))) {
+        return { ok: false, message: 'Classes can be scheduled from today up to 7 days ahead.' };
+    }
     try {
         await sql(
             'INSERT INTO class_sessions (class_type_id, trainer_id, room_id, starts_at, ends_at, capacity) VALUES (?, ?, ?, ?, NULL, ?)',
@@ -120,10 +133,10 @@ export async function cancelClassSession(prevState, formData) {
         const res = await sql("UPDATE class_sessions SET status = 'cancelled' WHERE class_session_id = ? AND status = 'scheduled'", [id]);
         if (!res.affectedRows) return { ok: false, message: 'Only a scheduled class can be cancelled.' };
         for (const a of affected) {
-            await notify(a.user_id, 'class_cancelled', `${a.class_name} on ${a.starts_at.slice(0, 16)} was cancelled`, 'Sorry! Your booking has been released. Please pick another class.');
+            await notify(a.user_id, 'class_cancelled', `${a.class_name} on ${dateTime(a.starts_at)} was cancelled`, 'Sorry! Your booking has been released. Please pick another class.');
         }
         revalidatePath('/admin/classes');
-        return { ok: true, message: `Class cancelled. ${affected.length} member(s) notified.` };
+        return { ok: true, message: `Class cancelled. ${plural(affected.length, 'member')} notified.` };
     } catch (err) {
         return fail(err);
     }

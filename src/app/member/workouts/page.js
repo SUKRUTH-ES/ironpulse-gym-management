@@ -7,7 +7,7 @@ import { ColumnChart, LineChart } from '@/components/charts';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { WorkoutLogger } from './workout-logger';
 import { logWorkout, logBodyWeight, activatePlan, deleteOwnPlan } from '../actions';
-import { num, date, label, daysAgo } from '@/lib/format';
+import { num, date, label, daysAgo, plural } from '@/lib/format';
 
 export const metadata = { title: 'Workouts & progress' };
 
@@ -124,22 +124,21 @@ export default async function WorkoutsPage() {
                                     <li key={String(p._id)} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
                                         <div className="min-w-0">
                                             <p className="truncate font-medium">{p.title}</p>
-                                            <p className="text-xs text-slate-500">{p.trainerId ? 'From your trainer' : 'Made by you'} · {p.days.length} days · {date(p.createdAt)}</p>
+                                            <p className="text-xs text-slate-500">{p.trainerId ? 'From your trainer' : 'Made by you'} · {plural(p.days.length, 'day')} · {date(p.createdAt)}</p>
                                         </div>
-                                        {p.status === 'active' ? <Badge status="active" /> : (
-                                            <div className="flex gap-1">
-                                                <ActionForm action={activatePlan} inlineMessage>
+                                        <div className="flex items-center gap-1">
+                                            {/* stays mounted when the plan becomes active, so "… is now your active plan" is still shown */}
+                                            <ActionForm action={activatePlan} inlineMessage showSuccess={p.status === 'active'} className="flex items-center gap-2">
+                                                <input type="hidden" name="plan_id" value={String(p._id)} />
+                                                {p.status === 'active' ? <Badge status="active" /> : <SubmitButton className="btn btn-secondary btn-sm">Use</SubmitButton>}
+                                            </ActionForm>
+                                            {!p.trainerId && p.status !== 'active' && (
+                                                <ActionForm action={deleteOwnPlan} inlineMessage confirm={`Delete "${p.title}"? This cannot be undone.`}>
                                                     <input type="hidden" name="plan_id" value={String(p._id)} />
-                                                    <SubmitButton className="btn btn-secondary btn-sm">Use</SubmitButton>
+                                                    <SubmitButton className="btn btn-danger btn-sm">Delete</SubmitButton>
                                                 </ActionForm>
-                                                {!p.trainerId && (
-                                                    <ActionForm action={deleteOwnPlan} inlineMessage>
-                                                        <input type="hidden" name="plan_id" value={String(p._id)} />
-                                                        <SubmitButton className="btn btn-danger btn-sm">Delete</SubmitButton>
-                                                    </ActionForm>
-                                                )}
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </li>
                                 ))}
                             </ul>

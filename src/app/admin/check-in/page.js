@@ -4,10 +4,12 @@ import { PageHeader, Card, Empty } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { checkIn, checkOut } from '../actions';
 import { time } from '@/lib/format';
+import { requireRole } from '@/lib/auth';
 
 export const metadata = { title: 'Front desk' };
 
 export default async function CheckInPage() {
+    await requireRole('admin');
     const inGym = await sql(
         `SELECT a.attendance_id, a.check_in, m.member_id, m.member_code, u.full_name,
                 TIMESTAMPDIFF(MINUTE, a.check_in, NOW()) AS minutes, cm.plan_name

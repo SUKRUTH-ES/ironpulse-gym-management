@@ -1,11 +1,21 @@
 import { notFound } from 'next/navigation';
+import { requireRole } from '@/lib/auth';
 import { sql, sqlOne } from '@/lib/db';
 import { PageHeader, Card, Badge, Empty, Stat } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { sellMembership, refundPayment, setMemberActive } from '../../actions';
-import { inr, date, dateTime, label, payMethod } from '@/lib/format';
+import { inr, date, dateTime, label, payMethod, plural } from '@/lib/format';
+
+// Browser tab shows the member's name
+export async function generateMetadata({ params }) {
+    await requireRole('admin');
+    const { id } = await params;
+    const m = await sqlOne('SELECT full_name FROM users u JOIN members m ON m.user_id = u.user_id WHERE m.member_id = ?', [Number.parseInt(id, 10)]);
+    return { title: m ? m.full_name : 'Member' };
+}
 
 export default async function MemberDetail({ params }) {
+    await requireRole('admin');
     const { id } = await params;
     const memberId = Number.parseInt(id, 10);
     const m = await sqlOne('SELECT * FROM v_member_overview WHERE member_id = ?', [memberId]);
@@ -43,7 +53,7 @@ export default async function MemberDetail({ params }) {
             </PageHeader>
 
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <Stat label="Current plan" value={m.plan_name ?? 'None'} hint={m.membership_end ? `Ends ${date(m.membership_end)} (${m.days_left} days)` : 'No active plan'} />
+                <Stat label="Current plan" value={m.plan_name ?? 'None'} hint={m.membership_end ? `Ends ${date(m.membership_end)} (${plural(m.days_left, 'day')})` : 'No active plan'} />
                 <Stat label="Visits (30 days)" value={stats.visits_30d ?? 0} hint={`${stats.total_visits} in total · avg ${stats.avg_minutes ?? 0} min`} />
                 <Stat label="Classes attended" value={booked.attended ?? 0} hint={`${booked.no_show ?? 0} no-shows · ${booked.cancelled ?? 0} cancelled`} />
                 <Stat label="Lifetime value" value={inr(totalPaid)} hint={`Member since ${date(m.joined_on)}`} />
@@ -56,7 +66,7 @@ export default async function MemberDetail({ params }) {
                         <div>
                             <label className="label" htmlFor="plan_id">Plan</label>
                             <select id="plan_id" name="plan_id" className="input" required>
-                                {plans.map((p) => <option key={p.plan_id} value={p.plan_id}>{p.name} — {inr(p.price)} / {p.duration_days} days</option>)}
+                                {plans.map((p) => <option key={p.plan_id} value={p.plan_id}>{p.name} — {inr(p.price)} / {plural(p.duration_days, 'day')}</option>)}
                             </select>
                         </div>
                         <div>
@@ -71,7 +81,8 @@ export default async function MemberDetail({ params }) {
                     <p className="mb-2 text-sm text-slate-600">
                         {m.is_active ? 'Deactivating blocks login and check-in. History is kept.' : 'This account is deactivated.'}
                     </p>
-                    <ActionForm action={setMemberActive}>
+                    <ActionForm action={setMemberActive}
+                        confirm={m.is_active ? `Deactivate ${m.full_name}? They will not be able to log in or check in.` : undefined}>
                         <input type="hidden" name="user_id" value={m.user_id} />
                         <input type="hidden" name="active" value={m.is_active ? '0' : '1'} />
                         <SubmitButton className={m.is_active ? 'btn btn-danger w-full' : 'btn btn-secondary w-full'}>
@@ -117,12 +128,11 @@ export default async function MemberDetail({ params }) {
                                             <td className="num">{inr(p.amount)}</td>
                                             <td><Badge status={p.status} /></td>
                                             <td className="text-right">
-                                                {p.status === 'completed' && (
-                                                    <ActionForm action={refundPayment} inlineMessage>
-                                                        <input type="hidden" name="payment_id" value={p.payment_id} />
-                                                        <SubmitButton className="btn btn-danger btn-sm">Refund</SubmitButton>
-                                                    </ActionForm>
-                                                )}
+                                                {/* the form stays mounted after the refund so its message is still shown */}
+                                                <ActionForm action={refundPayment} inlineMessage confirm={`Refund ${inr(p.amount)} for ${p.paid_for}? A refunded membership is cancelled.`}>
+                                                    <input type="hidden" name="payment_id" value={p.payment_id} />
+                                                    {p.status === 'completed' && <SubmitButton className="btn btn-danger btn-sm">Refund</SubmitButton>}
+                                                </ActionForm>
                                             </td>
                                         </tr>
                                     ))}

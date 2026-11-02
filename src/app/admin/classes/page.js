@@ -2,11 +2,13 @@ import { sql } from '@/lib/db';
 import { PageHeader, Card, Badge, Empty } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { createClassSession, cancelClassSession } from '../actions';
-import { dateShort, time, isoDay } from '@/lib/format';
+import { dateShort, time, isoDay, daysAgo, plural } from '@/lib/format';
+import { requireRole } from '@/lib/auth';
 
 export const metadata = { title: 'Classes' };
 
 export default async function ClassesPage() {
+    await requireRole('admin');
     const [schedule, types, trainers, rooms] = await Promise.all([
         sql(`SELECT class_session_id, starts_at, ends_at, class_name, intensity, trainer_name, room_name,
                     capacity, booked_count, waitlist_count, seats_left, status
@@ -47,7 +49,7 @@ export default async function ClassesPage() {
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <label className="label" htmlFor="date">Date</label>
-                                <input id="date" name="date" type="date" className="input" min={isoDay()} required />
+                                <input id="date" name="date" type="date" className="input" min={isoDay()} max={isoDay(daysAgo(-7))} required />
                             </div>
                             <div>
                                 <label className="label" htmlFor="time">Start</label>
@@ -80,12 +82,12 @@ export default async function ClassesPage() {
                                                 </td>
                                                 <td><Badge status={c.status} /></td>
                                                 <td className="text-right">
-                                                    {c.status === 'scheduled' && (
-                                                        <ActionForm action={cancelClassSession} inlineMessage>
-                                                            <input type="hidden" name="class_session_id" value={c.class_session_id} />
-                                                            <SubmitButton className="btn btn-danger btn-sm">Cancel</SubmitButton>
-                                                        </ActionForm>
-                                                    )}
+                                                    {/* the form stays mounted after cancelling so its message is still shown */}
+                                                    <ActionForm action={cancelClassSession} inlineMessage
+                                                        confirm={`Cancel ${c.class_name} at ${time(c.starts_at)}? ${plural(c.booked_count + c.waitlist_count, 'booked member')} will be notified.`}>
+                                                        <input type="hidden" name="class_session_id" value={c.class_session_id} />
+                                                        {c.status === 'scheduled' && <SubmitButton className="btn btn-danger btn-sm">Cancel</SubmitButton>}
+                                                    </ActionForm>
                                                 </td>
                                             </tr>
                                         ))}

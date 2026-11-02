@@ -6,7 +6,7 @@ import { inbox } from '@/lib/notifications';
 import { PageHeader, Card, Stat, Badge, Empty } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { cancelBooking, markNotificationsRead } from './actions';
-import { date, dateTime } from '@/lib/format';
+import { date, dateTime, plural } from '@/lib/format';
 
 export const metadata = { title: 'Home' };
 
@@ -53,7 +53,7 @@ export default async function MemberHome() {
             )}
 
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <Stat label="Membership" value={overview.plan_name ?? 'None'} hint={overview.membership_end ? `${status === 'frozen' ? 'Frozen · ' : ''}${overview.days_left} days left` : 'No active plan'} tone={status === 'active' ? 'good' : 'warn'} />
+                <Stat label="Membership" value={overview.plan_name ?? 'None'} hint={overview.membership_end ? `${status === 'frozen' ? 'Frozen · ' : ''}${plural(overview.days_left, 'day')} left` : 'No active plan'} tone={status === 'active' ? 'good' : 'warn'} />
                 <Stat label="Visits this month" value={visits.this_month ?? 0} hint={`${visits.this_week ?? 0} in the last 7 days`} />
                 <Stat label="Workouts logged" value={workoutsThisMonth} hint="This month" />
                 <Stat label="Upcoming bookings" value={bookings.length + pt.length} hint={`${pt.length} personal training`} />

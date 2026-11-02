@@ -35,6 +35,9 @@ export default async function TrainerMembers() {
     ]).toArray() : [];
     const activityOf = new Map(activity.map((a) => [a._id, a]));
     const planOf = new Map(myPlans.map((p) => [p.memberId, p]));
+    // Plan builder lists my own members first; any active member can still be picked
+    const mine = new Set(members.map((m) => m.member_id));
+    const option = (m) => <option key={m.member_id} value={m.member_id}>{m.full_name} ({m.member_code})</option>;
 
     return (
         <>
@@ -69,7 +72,8 @@ export default async function TrainerMembers() {
                         <div>
                             <label className="label" htmlFor="member_id">Member</label>
                             <select id="member_id" name="member_id" className="input" required>
-                                {allMembers.map((m) => <option key={m.member_id} value={m.member_id}>{m.full_name} ({m.member_code})</option>)}
+                                {mine.size > 0 && <optgroup label="My members">{allMembers.filter((m) => mine.has(m.member_id)).map(option)}</optgroup>}
+                                <optgroup label={mine.size > 0 ? 'Other members' : 'Members'}>{allMembers.filter((m) => !mine.has(m.member_id)).map(option)}</optgroup>
                             </select>
                         </div>
                         <div><label className="label" htmlFor="title">Plan title</label><input id="title" name="title" className="input" required minLength={3} maxLength={100} /></div>

@@ -3,17 +3,63 @@ import { sql, sqlOne } from '@/lib/db';
 import { PageHeader, Card, Stat, Badge, Empty } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { updatePtStatus, markAttendance } from './actions';
-import { inr, dateShort, dateTime, time } from '@/lib/format';
+import { inr, dateShort, dateTime, time, isoDay } from '@/lib/format';
 
 export const metadata = { title: 'My schedule' };
 
-function PtButton({ id, status, children, danger }) {
+function PtButton({ id, status, children, danger, price = 0 }) {
     return (
-        <ActionForm action={updatePtStatus} inlineMessage>
+        <ActionForm action={updatePtStatus} inlineMessage className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="pt_session_id" value={id} />
             <input type="hidden" name="status" value={status} />
+            {/* a paid session is charged when it is marked done, so ask how the member paid */}
+            {status === 'completed' && price > 0 && (
+                <select name="method" className="input w-auto py-1 text-sm" defaultValue="upi" aria-label="Paid with">
+                    <option value="upi">UPI</option><option value="card">Card</option><option value="cash">Cash</option><option value="netbanking">Net banking</option>
+                </select>
+            )}
             <SubmitButton className={`btn btn-sm ${danger ? 'btn-danger' : 'btn-primary'}`}>{children}</SubmitButton>
         </ActionForm>
+    );
+}
+
+function ClassLine({ c }) {
+    return (
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <div>
+                <p className="font-medium">{c.class_name} <span className="text-slate-500">· {c.room_name}</span></p>
+                <p className="text-slate-500">{dateShort(c.starts_at)}, {time(c.starts_at)}–{time(c.ends_at)}</p>
+            </div>
+            <div className="flex items-center gap-3">
+                <span className="tabular-nums text-slate-600">{c.booked_count}/{c.capacity}{c.waitlist_count > 0 && ` +${c.waitlist_count} waiting`}</span>
+                <Badge status={c.status} />
+            </div>
+        </div>
+    );
+}
+
+// Who was in a class: Present / Absent buttons per booking
+function Roster({ list, open }) {
+    return (
+        <details className="mt-2 rounded-lg bg-slate-50 p-3" open={open}>
+            <summary className="cursor-pointer text-sm font-medium">Take attendance ({list.filter((r) => r.status === 'attended').length}/{list.length} present)</summary>
+            <ul className="mt-2 space-y-1">
+                {list.map((r) => (
+                    <li key={r.booking_id} className="flex items-center justify-between gap-2 text-sm">
+                        <span>{r.full_name} <Badge status={r.status} /></span>
+                        <span className="flex gap-1">
+                            {['attended', 'no_show'].map((s) => (
+                                <ActionForm key={s} action={markAttendance}>
+                                    <input type="hidden" name="booking_id" value={r.booking_id} />
+                                    <input type="hidden" name="status" value={s} />
+                                    <SubmitButton className="btn btn-secondary btn-sm" disabled={r.status === s}>{s === 'attended' ? 'Present' : 'Absent'}</SubmitButton>
+                                </ActionForm>
+                            ))}
+                        </span>
+                    </li>
+                ))}
+            </ul>
+        </details>
     );
 }
 
@@ -23,14 +69,14 @@ export default async function TrainerHome() {
     const [classes, roster, pt, stats] = await Promise.all([
         sql(`SELECT class_session_id, starts_at, ends_at, class_name, room_name, capacity, booked_count, waitlist_count, status
              FROM v_class_schedule
-             WHERE trainer_id = ? AND starts_at >= CURRENT_DATE AND starts_at < CURRENT_DATE + INTERVAL 7 DAY
+             WHERE trainer_id = ? AND starts_at >= CURRENT_DATE - INTERVAL 2 DAY AND starts_at < CURRENT_DATE + INTERVAL 7 DAY
              ORDER BY starts_at`, [me.trainer_id]),
-        // Roster for my classes that started today (to take attendance)
+        // Roster for my classes that started in the last 2 days or today (attendance can still be corrected)
         sql(`SELECT cb.booking_id, cb.class_session_id, cb.status, u.full_name, m.member_code
              FROM class_bookings cb
              JOIN class_sessions cs ON cs.class_session_id = cb.class_session_id
              JOIN members m ON m.member_id = cb.member_id JOIN users u ON u.user_id = m.user_id
-             WHERE cs.trainer_id = ? AND DATE(cs.starts_at) = CURRENT_DATE AND cs.starts_at <= NOW()
+             WHERE cs.trainer_id = ? AND cs.starts_at >= CURRENT_DATE - INTERVAL 2 DAY AND cs.starts_at <= NOW()
                AND cb.status IN ('booked','attended','no_show')
              ORDER BY u.full_name`, [me.trainer_id]),
         sql(`SELECT ps.pt_session_id, ps.starts_at, ps.ends_at, ps.status, ps.price, ps.member_note, u.full_name, m.member_code
@@ -50,12 +96,16 @@ export default async function TrainerHome() {
     const requests = pt.filter((p) => p.status === 'requested');
     const confirmed = pt.filter((p) => p.status === 'confirmed');
     const now = new Date();
+    const today = isoDay(now);
+    const started = (c) => new Date(c.starts_at.replace(' ', 'T')) <= now;
+    const upcoming = classes.filter((c) => !started(c));
+    const recent = classes.filter((c) => started(c) && rosterByClass.has(c.class_session_id)).reverse();
 
     return (
         <>
             <PageHeader title="My schedule" subtitle={`Hello ${me.full_name.split(' ')[0]} — here is your week.`} />
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <Stat label="Classes this week" value={classes.filter((c) => c.status !== 'cancelled').length} />
+                <Stat label="Classes this week" value={classes.filter((c) => c.starts_at >= today && c.status !== 'cancelled').length} />
                 <Stat label="PT requests waiting" value={requests.length} tone={requests.length ? 'warn' : 'default'} hint={requests.length ? 'Confirm or decline below' : 'All caught up'} />
                 <Stat label="PT sessions this month" value={stats.pt_this_month} hint={`${inr(stats.pt_revenue)} earned for the gym`} />
                 <Stat label="Average class fill" value={`${stats.occupancy ?? 0}%`} hint="Completed classes" />
@@ -91,7 +141,7 @@ export default async function TrainerHome() {
                                         <p className="text-slate-500">{dateTime(p.starts_at)}–{time(p.ends_at)}</p>
                                     </div>
                                     {new Date(p.starts_at.replace(' ', 'T')) <= now
-                                        ? <PtButton id={p.pt_session_id} status="completed">Mark done</PtButton>
+                                        ? <PtButton id={p.pt_session_id} status="completed" price={p.price}>{p.price > 0 ? `Mark done · ${inr(p.price)}` : 'Mark done'}</PtButton>
                                         : <PtButton id={p.pt_session_id} status="cancelled" danger>Cancel</PtButton>}
                                 </li>
                             ))}
@@ -100,47 +150,23 @@ export default async function TrainerHome() {
                 </Card>
             </div>
 
-            <Card title="My classes (next 7 days)" className="mt-6">
-                {classes.length ? (
+            <Card title="Attendance" subtitle="Classes from today and the last 2 days; absentees are marked automatically, correct them here." className="mt-6">
+                {recent.length ? (
                     <ul className="divide-y divide-slate-100">
-                        {classes.map((c) => {
-                            const list = rosterByClass.get(c.class_session_id) ?? [];
-                            return (
-                                <li key={c.class_session_id} className="py-3">
-                                    <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                                        <div>
-                                            <p className="font-medium">{c.class_name} <span className="text-slate-500">· {c.room_name}</span></p>
-                                            <p className="text-slate-500">{dateShort(c.starts_at)}, {time(c.starts_at)}–{time(c.ends_at)}</p>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className="tabular-nums text-slate-600">{c.booked_count}/{c.capacity}{c.waitlist_count > 0 && ` +${c.waitlist_count} waiting`}</span>
-                                            <Badge status={c.status} />
-                                        </div>
-                                    </div>
-                                    {list.length > 0 && (
-                                        <details className="mt-2 rounded-lg bg-slate-50 p-3" open>
-                                            <summary className="cursor-pointer text-sm font-medium">Take attendance ({list.filter((r) => r.status === 'attended').length}/{list.length} present)</summary>
-                                            <ul className="mt-2 space-y-1">
-                                                {list.map((r) => (
-                                                    <li key={r.booking_id} className="flex items-center justify-between gap-2 text-sm">
-                                                        <span>{r.full_name} <Badge status={r.status} /></span>
-                                                        <span className="flex gap-1">
-                                                            {['attended', 'no_show'].map((s) => (
-                                                                <ActionForm key={s} action={markAttendance}>
-                                                                    <input type="hidden" name="booking_id" value={r.booking_id} />
-                                                                    <input type="hidden" name="status" value={s} />
-                                                                    <SubmitButton className="btn btn-secondary btn-sm" disabled={r.status === s}>{s === 'attended' ? 'Present' : 'Absent'}</SubmitButton>
-                                                                </ActionForm>
-                                                            ))}
-                                                        </span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </details>
-                                    )}
-                                </li>
-                            );
-                        })}
+                        {recent.map((c) => (
+                            <li key={c.class_session_id} className="py-3">
+                                <ClassLine c={c} />
+                                <Roster list={rosterByClass.get(c.class_session_id)} open={c.starts_at.startsWith(today)} />
+                            </li>
+                        ))}
+                    </ul>
+                ) : <Empty>No classes to take attendance for.</Empty>}
+            </Card>
+
+            <Card title="My classes (next 7 days)" className="mt-6">
+                {upcoming.length ? (
+                    <ul className="divide-y divide-slate-100">
+                        {upcoming.map((c) => <li key={c.class_session_id} className="py-3"><ClassLine c={c} /></li>)}
                     </ul>
                 ) : <Empty>No classes this week.</Empty>}
             </Card>

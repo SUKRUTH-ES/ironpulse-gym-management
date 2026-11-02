@@ -3,10 +3,12 @@ import { sql, sqlOne } from '@/lib/db';
 import { PageHeader, Card, Stat, Badge, Empty } from '@/components/ui';
 import { ColumnChart, Heatmap } from '@/components/charts';
 import { inr, num, date, time } from '@/lib/format';
+import { requireRole } from '@/lib/auth';
 
 export const metadata = { title: 'Dashboard' };
 
 export default async function AdminDashboard() {
+    await requireRole('admin');
     const [kpi, revenue, heat, expiring, churn, todayClasses] = await Promise.all([
         sqlOne(`SELECT
             (SELECT COUNT(*) FROM v_current_memberships WHERE status = 'active') AS active_members,

@@ -5,16 +5,19 @@ import { requireRole } from '@/lib/auth';
 import { sql, sqlOne, transaction, dbErrorMessage } from '@/lib/db';
 import { mongo } from '@/lib/mongo';
 import { notify } from '@/lib/notifications';
-import { dateTime, inr } from '@/lib/format';
+import { dateTime, inr, payMethod } from '@/lib/format';
 
 const int = (v) => Number.parseInt(String(v ?? ''), 10);
+const METHODS = ['upi', 'card', 'cash', 'netbanking'];
 
 // Moves one of MY personal training sessions to a new status.
-// Completing a paid session also records its payment, in the same transaction.
+// Completing a paid session also records its payment (method chosen by the trainer,
+// recorded_by = the trainer's user id), in the same transaction.
 export async function updatePtStatus(prevState, formData) {
     const me = await requireRole('trainer');
     const id = int(formData.get('pt_session_id'));
     const next = String(formData.get('status'));
+    const method = String(formData.get('method') || '');
     const allowed = { confirmed: ['requested'], cancelled: ['requested', 'confirmed'], completed: ['confirmed'] };
     if (!allowed[next]) return { ok: false, message: 'Unknown action.' };
 
@@ -30,25 +33,31 @@ export async function updatePtStatus(prevState, formData) {
             if (next === 'completed' && new Date(row.starts_at.replace(' ', 'T')) > new Date()) {
                 throw Object.assign(new Error(), { sqlState: '45000', sqlMessage: 'The session has not happened yet.' });
             }
+            const charged = next === 'completed' && row.price > 0;
+            if (charged && !METHODS.includes(method)) {
+                throw Object.assign(new Error(), { sqlState: '45000', sqlMessage: 'Pick how the member paid.' });
+            }
             await conn.execute('UPDATE pt_sessions SET status = ? WHERE pt_session_id = ?', [next, id]);
-            if (next === 'completed' && row.price > 0) {
+            if (charged) {
                 await conn.execute(
-                    `INSERT INTO payments (member_id, pt_session_id, amount, method, transaction_ref)
-                     VALUES (?, ?, ?, 'upi', CONCAT('PT-', ?, '-', UNIX_TIMESTAMP()))`, [row.member_id, id, row.price, id]);
+                    `INSERT INTO payments (member_id, pt_session_id, amount, method, transaction_ref, recorded_by)
+                     VALUES (?, ?, ?, ?, CONCAT('PT-', ?, '-', UNIX_TIMESTAMP()), ?)`, [row.member_id, id, row.price, method, id, me.user_id]);
             }
             return row;
         });
         const verb = { confirmed: 'confirmed', cancelled: 'cancelled', completed: 'marked as done' }[next];
+        const paid = next === 'completed' && s.price > 0 ? ` · ${inr(s.price)} paid by ${payMethod(method)}` : '';
         await notify(s.user_id, 'pt_update', `Personal training ${verb}`,
-            `${me.full_name} ${verb} your session on ${dateTime(s.starts_at)}${next === 'completed' && s.price > 0 ? ` · ${inr(s.price)} charged` : ''}.`);
+            `${me.full_name} ${verb} your session on ${dateTime(s.starts_at)}${paid}.`);
         revalidatePath('/trainer');
-        return { ok: true, message: `Session ${verb}.` };
+        return { ok: true, message: `Session ${verb}${paid}.` };
     } catch (err) {
         return { ok: false, message: dbErrorMessage(err) };
     }
 }
 
-// Takes attendance for one of MY classes after it has started.
+// Takes attendance for one of MY classes once it has started. It can still be
+// corrected for 2 days afterwards (the housekeeping event marks absentees as no_show).
 export async function markAttendance(prevState, formData) {
     const me = await requireRole('trainer');
     const bookingId = int(formData.get('booking_id'));
@@ -56,10 +65,13 @@ export async function markAttendance(prevState, formData) {
     const res = await sql(
         `UPDATE class_bookings cb JOIN class_sessions cs ON cs.class_session_id = cb.class_session_id
          SET cb.status = ?
-         WHERE cb.booking_id = ? AND cs.trainer_id = ? AND cs.starts_at <= NOW()
+         WHERE cb.booking_id = ? AND cs.trainer_id = ?
+           AND cs.starts_at <= NOW() AND cs.starts_at >= CURRENT_DATE - INTERVAL 2 DAY
            AND cb.status IN ('booked','attended','no_show')`, [status, bookingId, me.trainer_id]);
     revalidatePath('/trainer');
-    return res.affectedRows ? { ok: true, message: 'Saved.' } : { ok: false, message: 'Attendance can be taken once the class has started.' };
+    return res.affectedRows
+        ? { ok: true, message: 'Saved.' }
+        : { ok: false, message: 'Attendance can be taken from the start of the class until 2 days later.' };
 }
 
 // Creates a workout plan document in MongoDB for a member.

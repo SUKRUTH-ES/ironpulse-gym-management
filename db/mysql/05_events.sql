@@ -20,6 +20,7 @@ END$$
 
 -- Finished classes become 'completed'; anyone still 'booked' did not show up.
 -- Visits left open for more than 4 hours are closed automatically.
+-- PT requests the trainer never answered expire once their start time has passed.
 CREATE PROCEDURE sp_close_finished_classes()
 BEGIN
     UPDATE class_bookings cb
@@ -33,6 +34,9 @@ BEGIN
 
     UPDATE attendance SET check_out = check_in + INTERVAL 4 HOUR
     WHERE check_out IS NULL AND check_in < NOW() - INTERVAL 4 HOUR;
+
+    UPDATE pt_sessions SET status = 'cancelled'
+    WHERE status = 'requested' AND starts_at < NOW();
 END$$
 
 DELIMITER ;

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { sql, sqlOne } from '@/lib/db';
 import { PageHeader, Card, Badge, Empty } from '@/components/ui';
 import { date, label } from '@/lib/format';
+import { requireRole } from '@/lib/auth';
 
 export const metadata = { title: 'Members' };
 
@@ -9,6 +10,7 @@ const PAGE_SIZE = 25;
 const STATUSES = ['active', 'frozen', 'expired', 'none'];
 
 export default async function MembersPage({ searchParams }) {
+    await requireRole('admin');
     const { q = '', status = '', page = '1' } = await searchParams;
     const pageNo = Math.max(1, Number.parseInt(page, 10) || 1);
 

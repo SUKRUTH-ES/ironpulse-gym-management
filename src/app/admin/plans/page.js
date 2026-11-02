@@ -3,10 +3,12 @@ import { PageHeader, Card, Badge } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { createPlan, togglePlan } from '../actions';
 import { inr } from '@/lib/format';
+import { requireRole } from '@/lib/auth';
 
 export const metadata = { title: 'Plans' };
 
 export default async function PlansPage() {
+    await requireRole('admin');
     const plans = await sql(
         `SELECT p.*,
                 (SELECT COUNT(*) FROM v_current_memberships cm WHERE cm.plan_id = p.plan_id) AS current_members,

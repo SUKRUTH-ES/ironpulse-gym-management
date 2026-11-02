@@ -2,10 +2,12 @@ import Link from 'next/link';
 import { sql } from '@/lib/db';
 import { PageHeader, Card, BarList, Empty } from '@/components/ui';
 import { inr, num, date, dateTime, label, payMethod } from '@/lib/format';
+import { requireRole } from '@/lib/auth';
 
 export const metadata = { title: 'Reports' };
 
 export default async function ReportsPage() {
+    await requireRole('admin');
     const [byPlan, byMethod, classStats, trainers, topMembers, churn, neverBooked, audit] = await Promise.all([
         // Revenue per plan over the last 6 months (JOIN + GROUP BY)
         sql(`SELECT p.name, COUNT(*) AS sold, SUM(pay.amount) AS revenue

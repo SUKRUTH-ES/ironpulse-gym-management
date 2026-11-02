@@ -4,12 +4,14 @@ import { PageHeader, Card, Badge, Empty, Stat } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { refundPayment } from '../actions';
 import { inr, num, dateTime, label, isoDay, payMethod } from '@/lib/format';
+import { requireRole } from '@/lib/auth';
 
 export const metadata = { title: 'Payments' };
 
 const METHODS = ['upi', 'card', 'cash', 'netbanking'];
 
 export default async function PaymentsPage({ searchParams }) {
+    await requireRole('admin');
     const sp = await searchParams;
     const today = new Date();
     const from = /^\d{4}-\d{2}-\d{2}$/.test(sp.from ?? '') ? sp.from : isoDay(new Date(today.getFullYear(), today.getMonth(), 1));
@@ -82,12 +84,11 @@ export default async function PaymentsPage({ searchParams }) {
                                         <td className="num">{inr(p.amount)}</td>
                                         <td><Badge status={p.status} /></td>
                                         <td className="text-right">
-                                            {p.status === 'completed' && (
-                                                <ActionForm action={refundPayment} inlineMessage>
-                                                    <input type="hidden" name="payment_id" value={p.payment_id} />
-                                                    <SubmitButton className="btn btn-danger btn-sm">Refund</SubmitButton>
-                                                </ActionForm>
-                                            )}
+                                            {/* the form stays mounted after the refund so its message is still shown */}
+                                            <ActionForm action={refundPayment} inlineMessage confirm={`Refund ${inr(p.amount)} to ${p.full_name}? A refunded membership is cancelled.`}>
+                                                <input type="hidden" name="payment_id" value={p.payment_id} />
+                                                {p.status === 'completed' && <SubmitButton className="btn btn-danger btn-sm">Refund</SubmitButton>}
+                                            </ActionForm>
                                         </td>
                                     </tr>
                                 ))}

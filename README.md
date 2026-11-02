@@ -50,7 +50,7 @@ db/mysql/01_schema.sql    tables, keys, CHECK constraints, indexes, FULLTEXT, AL
 db/mysql/02_views.sql     7 views (current memberships, schedule, revenue, churn risk...)
 db/mysql/03_routines.sql  4 functions + 9 stored procedures (all multi-step ones are transactions)
 db/mysql/04_triggers.sql  17 triggers (validation, clash detection, audit log, cascade cancel)
-db/mysql/05_events.sql    scheduled events (expire memberships, close finished classes)
+db/mysql/05_events.sql    scheduled events (expire memberships, close finished classes, expire unanswered PT requests)
 db/mongo/collections.mjs  MongoDB collections, $jsonSchema validators, indexes (text, TTL, time series)
 scripts/db-setup.mjs      builds everything; creates the limited app account
 scripts/seed-data.mjs     realistic demo data (~110 members, 10 months of history)

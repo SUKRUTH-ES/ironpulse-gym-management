@@ -3,7 +3,7 @@ import { sql, sqlOne } from '@/lib/db';
 import { PageHeader, Card, Badge, Empty } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
 import { buyMembership, freezeMembership, unfreezeMembership } from '../actions';
-import { inr, date, label, payMethod } from '@/lib/format';
+import { inr, date, label, payMethod, plural } from '@/lib/format';
 
 export const metadata = { title: 'Membership' };
 
@@ -27,7 +27,7 @@ export default async function MembershipPage({ searchParams }) {
     return (
         <>
             <PageHeader title="Membership" />
-            {welcome && (
+            {welcome && !current && (
                 <div className="mb-6 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">
                     Welcome to IronPulse! Your member code is <span className="font-mono font-semibold">{me.member_code}</span>. Pick a plan below to get started.
                 </div>
@@ -38,9 +38,9 @@ export default async function MembershipPage({ searchParams }) {
                     {current ? (
                         <div className="space-y-3 text-sm">
                             <div className="flex items-center justify-between"><span className="text-lg font-semibold">{current.plan_name}</span><Badge status={current.status} /></div>
-                            <p className="text-slate-600">{date(current.start_date)} – {date(current.end_date)} · {current.days_left} days left</p>
+                            <p className="text-slate-600">{date(current.start_date)} – {date(current.end_date)} · {plural(current.days_left, 'day')} left</p>
                             <p className="text-slate-600">
-                                {current.classes_per_week ? `${current.classes_per_week} classes a week` : 'Unlimited classes'} · {current.pt_sessions_included} PT session(s) included
+                                {current.classes_per_week ? `${plural(current.classes_per_week, 'class', 'classes')} a week` : 'Unlimited classes'} · {plural(current.pt_sessions_included, 'PT session')} included
                             </p>
                             {queued && <p className="rounded-lg bg-slate-50 p-2 text-slate-600">Next: {queued.name} from {date(queued.start_date)}</p>}
                             {current.status === 'frozen' ? (
@@ -51,7 +51,7 @@ export default async function MembershipPage({ searchParams }) {
                                 </ActionForm>
                             ) : current.max_freeze_days > 0 ? (
                                 <ActionForm action={freezeMembership}>
-                                    <p className="mb-2 text-slate-600">Away for a while? Freeze for up to {freezeLeft} more day(s); they are added to your end date.</p>
+                                    <p className="mb-2 text-slate-600">Away for a while? Freeze for up to {plural(freezeLeft, 'more day', 'more days')}; they are added to your end date.</p>
                                     <input type="hidden" name="membership_id" value={current.membership_id} />
                                     <SubmitButton className="btn btn-secondary w-full" disabled={freezeLeft <= 0}>Freeze membership</SubmitButton>
                                 </ActionForm>
@@ -68,7 +68,7 @@ export default async function MembershipPage({ searchParams }) {
                                     <input type="radio" name="plan_id" value={p.plan_id} defaultChecked={i === 0} className="mt-1 accent-teal-700" />
                                     <span>
                                         <span className="block font-medium">{p.name} · {inr(p.price)}</span>
-                                        <span className="block text-xs text-slate-500">{p.duration_days} days · {p.description}</span>
+                                        <span className="block text-xs text-slate-500">{plural(p.duration_days, 'day')} · {p.description}</span>
                                     </span>
                                 </label>
                             ))}

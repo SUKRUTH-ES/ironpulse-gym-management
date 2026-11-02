@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { sql } from '@/lib/db';
 import { Logo } from '@/components/brand';
-import { inr } from '@/lib/format';
+import { inr, plural } from '@/lib/format';
 
 export default async function Home() {
     const [plans, classTypes] = await Promise.all([
@@ -40,7 +40,7 @@ export default async function Home() {
                             <div key={p.plan_id} className="card flex flex-col">
                                 <p className="font-semibold">{p.name}</p>
                                 <p className="mt-2 text-2xl font-semibold tabular-nums">{inr(p.price)}</p>
-                                <p className="text-xs text-slate-500">{p.duration_days} days</p>
+                                <p className="text-xs text-slate-500">{plural(p.duration_days, 'day')}</p>
                                 <p className="mt-3 text-sm text-slate-600">{p.description}</p>
                             </div>
                         ))}

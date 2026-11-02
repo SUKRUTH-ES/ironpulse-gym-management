@@ -6,7 +6,7 @@ import { requireRole } from '@/lib/auth';
 import { sql, sqlOne, callProcedure, dbErrorMessage } from '@/lib/db';
 import { mongo, toObjectId } from '@/lib/mongo';
 import { notify } from '@/lib/notifications';
-import { inr, dateTime } from '@/lib/format';
+import { inr, date, dateTime, plural } from '@/lib/format';
 import { isTimed } from '@/lib/workout';
 
 const fail = (err) => ({ ok: false, message: dbErrorMessage(err) });
@@ -60,7 +60,7 @@ export async function buyMembership(prevState, formData) {
             `SELECT p.name, p.price, ms.start_date, ms.end_date FROM memberships ms
              JOIN membership_plans p ON p.plan_id = ms.plan_id WHERE ms.membership_id = ?`, [out.membership_id]);
         revalidatePath('/member', 'layout');
-        return { ok: true, message: `Paid ${inr(ms.price)}. ${ms.name} is valid from ${ms.start_date} to ${ms.end_date}.` };
+        return { ok: true, message: `Paid ${inr(ms.price)}. ${ms.name} is valid from ${date(ms.start_date)} to ${date(ms.end_date)}.` };
     } catch (err) {
         return fail(err);
     }
@@ -82,7 +82,7 @@ export async function unfreezeMembership(prevState, formData) {
     try {
         const out = await callProcedure('sp_unfreeze_membership', [int(formData.get('membership_id')), me.member_id], ['days_added']);
         revalidatePath('/member', 'layout');
-        return { ok: true, message: `Welcome back! ${out.days_added} day(s) added to your plan.` };
+        return { ok: true, message: `Welcome back! ${plural(out.days_added, 'day')} added to your plan.` };
     } catch (err) {
         return fail(err);
     }
@@ -97,7 +97,7 @@ export async function bookPt(prevState, formData) {
             [me.member_id, int(f.trainer_id), `${f.date} ${f.time}:00`, int(f.duration), String(f.note || '').slice(0, 255) || null],
             ['pt_session_id', 'price']);
         const trainer = await sqlOne('SELECT u.user_id, u.full_name FROM trainers t JOIN users u ON u.user_id = t.user_id WHERE t.trainer_id = ?', [int(f.trainer_id)]);
-        await notify(trainer.user_id, 'pt_update', 'New personal training request', `${me.full_name} requested ${f.date} at ${f.time}.`);
+        await notify(trainer.user_id, 'pt_update', 'New personal training request', `${me.full_name} requested ${dateTime(`${f.date} ${f.time}`)}.`);
         revalidatePath('/member/training');
         return { ok: true, message: `Request sent to ${trainer.full_name}. ${out.price > 0 ? `Price: ${inr(out.price)}, paid after the session.` : 'Included in your plan.'}` };
     } catch (err) {
