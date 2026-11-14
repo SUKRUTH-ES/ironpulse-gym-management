@@ -17,7 +17,8 @@
 //  before writing here (application-level referential integrity).
 // =====================================================================
 
-// One set: reps (+ weight) for lifts, durationSec for holds like a plank
+// One set: reps (+ weight) for lifts, durationSec for holds like a plank and for
+// cardio (entered in minutes in the app, stored in seconds; up to 3 hours)
 const setRep = {
     bsonType: 'object',
     minProperties: 1,
@@ -25,7 +26,7 @@ const setRep = {
     properties: {
         reps: { bsonType: 'int', minimum: 0, maximum: 200 },
         weightKg: { bsonType: ['double', 'int'], minimum: 0, maximum: 600 },
-        durationSec: { bsonType: 'int', minimum: 1, maximum: 3600 },
+        durationSec: { bsonType: 'int', minimum: 1, maximum: 10800 },
     },
 };
 

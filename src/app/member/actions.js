@@ -8,7 +8,7 @@ import { sql, sqlOne, callProcedure, transaction, dbErrorMessage } from '@/lib/d
 import { mongo, toObjectId } from '@/lib/mongo';
 import { notify } from '@/lib/notifications';
 import { inr, date, dateTime, plural } from '@/lib/format';
-import { isTimed } from '@/lib/workout';
+import { isTimed, timeUnit } from '@/lib/workout';
 
 const fail = (err) => ({ ok: false, message: dbErrorMessage(err) });
 const int = (v) => Number.parseInt(String(v ?? ''), 10);
@@ -143,7 +143,7 @@ export async function logWorkout(prevState, formData) {
             const value = int(formData.get(`reps_${i}_${s}`));
             const weight = Number(formData.get(`kg_${i}_${s}`));
             if (Number.isNaN(value) || value <= 0) continue;
-            if (timed) sets.push({ durationSec: value });
+            if (timed) sets.push({ durationSec: timeUnit(ex.reps) === 'min' ? value * 60 : value }); // cardio typed in minutes
             else sets.push(weight > 0 ? { reps: value, weightKg: weight } : { reps: value });
         }
         if (sets.length) exercises.push({ exerciseId: ex.exerciseId, name: ex.name, sets });
@@ -161,7 +161,7 @@ export async function logWorkout(prevState, formData) {
     try {
         await mongo().collection('workout_logs').insertOne(doc);
     } catch {
-        return { ok: false, message: 'Some values are out of range (reps 0–200, weight 0–600 kg).' };
+        return { ok: false, message: 'Some values are out of range (reps 0–200, weight 0–600 kg, up to 3 hours per timed set).' };
     }
     revalidatePath('/member/workouts');
     return { ok: true, message: `Logged ${day.title}: ${exercises.length} exercises, ${exercises.reduce((n, e) => n + e.sets.length, 0)} sets.` };

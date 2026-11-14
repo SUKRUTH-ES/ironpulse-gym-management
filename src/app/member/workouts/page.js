@@ -150,12 +150,18 @@ export default async function WorkoutsPage() {
                     <Card title="Recent workouts">
                         {recent.length ? (
                             <ul className="space-y-2 text-sm">
-                                {recent.map((w) => (
-                                    <li key={String(w._id)} className="flex justify-between gap-2">
-                                        <span>{date(w.performedAt)}</span>
-                                        <span className="text-slate-500">{w.exercises?.length ?? 0} exercises · {w.durationMin} min · RPE {w.rpe}</span>
-                                    </li>
-                                ))}
+                                {recent.map((w) => {
+                                    // cardio and holds are stored as durationSec per set
+                                    const timedMin = Math.round((w.exercises ?? []).flatMap((e) => e.sets).reduce((t, s) => t + (s.durationSec ?? 0), 0) / 60);
+                                    return (
+                                        <li key={String(w._id)} className="flex justify-between gap-2">
+                                            <span>{date(w.performedAt)}</span>
+                                            <span className="text-slate-500">
+                                                {plural(w.exercises?.length ?? 0, 'exercise')}{timedMin > 0 && ` (${timedMin} min cardio/holds)`} · {w.durationMin} min · RPE {w.rpe}
+                                            </span>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         ) : <Empty>Nothing logged yet.</Empty>}
                     </Card>
