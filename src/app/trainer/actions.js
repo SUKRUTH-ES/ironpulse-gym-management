@@ -120,3 +120,9 @@ export async function createWorkoutPlan(prevState, formData) {
     revalidatePath('/trainer/members');
     return { ok: true, message: 'Plan saved and the member was notified.' };
 }
+
+export async function markTrainerNotificationsRead() {
+    const me = await requireRole('trainer');
+    await mongo().collection('notifications').updateMany({ userId: me.user_id, readAt: null }, { $set: { readAt: new Date() } });
+    revalidatePath('/trainer');
+}

@@ -8,6 +8,7 @@ const NAV = [
     { href: '/member/workouts', label: 'Workouts & progress' },
     { href: '/member/exercises', label: 'Exercise library' },
     { href: '/member/membership', label: 'Membership' },
+    { href: '/member/profile', label: 'My profile' },
 ];
 
 export default async function MemberLayout({ children }) {

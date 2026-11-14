@@ -17,6 +17,7 @@ DROP TRIGGER IF EXISTS trg_class_sessions_bu;
 DROP TRIGGER IF EXISTS trg_class_sessions_au;
 DROP TRIGGER IF EXISTS trg_pt_sessions_bi;
 DROP TRIGGER IF EXISTS trg_pt_sessions_bu;
+DROP TRIGGER IF EXISTS trg_pt_sessions_au;
 DROP TRIGGER IF EXISTS trg_attendance_bi;
 DROP TRIGGER IF EXISTS trg_payments_ai;
 DROP TRIGGER IF EXISTS trg_payments_bu;
@@ -60,6 +61,9 @@ CREATE TRIGGER trg_users_bu BEFORE UPDATE ON users FOR EACH ROW
 BEGIN
     SET NEW.email = LOWER(TRIM(NEW.email));
     SET NEW.full_name = TRIM(NEW.full_name);
+    IF NEW.password_hash <> OLD.password_hash THEN
+        SET NEW.password_changed_at = NOW();
+    END IF;
 END$$
 
 -- ---------------------------------------------------------------------
@@ -223,6 +227,16 @@ BEGIN
     IF NEW.status <> 'cancelled'
        AND (NEW.starts_at <> OLD.starts_at OR NEW.ends_at <> OLD.ends_at OR NEW.trainer_id <> OLD.trainer_id) THEN
         CALL sp_assert_trainer_free(NEW.trainer_id, NEW.starts_at, NEW.ends_at, NULL, NEW.pt_session_id);
+    END IF;
+END$$
+
+-- Every PT status change (confirmed, cancelled, completed) is kept in the audit log
+CREATE TRIGGER trg_pt_sessions_au AFTER UPDATE ON pt_sessions FOR EACH ROW
+BEGIN
+    IF NEW.status <> OLD.status THEN
+        INSERT INTO audit_log (table_name, record_id, action, old_value, new_value, changed_by)
+        VALUES ('pt_sessions', NEW.pt_session_id, 'UPDATE',
+                JSON_OBJECT('status', OLD.status), JSON_OBJECT('status', NEW.status), USER());
     END IF;
 END$$
 

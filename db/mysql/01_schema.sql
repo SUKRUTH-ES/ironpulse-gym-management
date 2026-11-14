@@ -242,6 +242,9 @@ CREATE TABLE audit_log (
 -- v1.1: trainers can be marked unavailable for new PT bookings
 ALTER TABLE trainers ADD COLUMN accepts_pt BOOLEAN NOT NULL DEFAULT TRUE AFTER session_rate;
 
+-- v1.2: members can change their password; remember when (set by trg_users_bu)
+ALTER TABLE users ADD COLUMN password_changed_at DATETIME NULL AFTER password_hash;
+
 -- v1.1: a scratch table from v1.0 that is no longer needed
 CREATE TABLE tmp_import_members (member_code CHAR(8), raw_row TEXT);
 DROP TABLE tmp_import_members;

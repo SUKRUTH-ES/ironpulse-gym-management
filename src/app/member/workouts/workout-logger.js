@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ActionForm, SubmitButton } from '@/components/forms';
-import { isTimed } from '@/lib/workout';
+import { isTimed, timeUnit } from '@/lib/workout';
 
 // Form that adapts to the chosen plan day: one row of inputs per set.
 export function WorkoutLogger({ plan, action }) {
@@ -24,13 +24,15 @@ export function WorkoutLogger({ plan, action }) {
             <div className="space-y-3" key={dayNo}>
                 {day.exercises.map((ex, i) => {
                     const timed = isTimed(ex.reps);
+                    const unit = timeUnit(ex.reps);
                     return (
                         <div key={i} className="rounded-lg border border-slate-200 p-3">
                             <p className="text-sm font-medium">{ex.name} <span className="font-normal text-slate-500">· {ex.sets} × {ex.reps}</span></p>
                             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
                                 {Array.from({ length: ex.sets }, (_, s) => (
                                     <div key={s} className="flex items-center gap-1">
-                                        <input name={`reps_${i}_${s}`} type="number" min="0" max={timed ? 3600 : 200} className="input px-2" placeholder={timed ? 'sec' : 'reps'} aria-label={`Set ${s + 1} ${timed ? 'seconds' : 'reps'}`} />
+                                        <input name={`reps_${i}_${s}`} type="number" min="0" max={!timed ? 200 : unit === 'min' ? 180 : 3600} className="input px-2"
+                                            placeholder={timed ? unit : 'reps'} aria-label={`Set ${s + 1} ${!timed ? 'reps' : unit === 'min' ? 'minutes' : 'seconds'}`} />
                                         {!timed && <input name={`kg_${i}_${s}`} type="number" min="0" max="600" step="0.5" className="input px-2" placeholder="kg" aria-label={`Set ${s + 1} weight`} />}
                                     </div>
                                 ))}

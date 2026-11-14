@@ -1,13 +1,14 @@
 'use server';
 
+import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth';
-import { sql, sqlOne, callProcedure, dbErrorMessage } from '@/lib/db';
+import { sql, sqlOne, callProcedure, transaction, dbErrorMessage } from '@/lib/db';
 import { mongo, toObjectId } from '@/lib/mongo';
 import { notify } from '@/lib/notifications';
 import { inr, date, dateTime, plural } from '@/lib/format';
-import { isTimed } from '@/lib/workout';
+import { isTimed, timeUnit } from '@/lib/workout';
 
 const fail = (err) => ({ ok: false, message: dbErrorMessage(err) });
 const int = (v) => Number.parseInt(String(v ?? ''), 10);
@@ -107,14 +108,22 @@ export async function bookPt(prevState, formData) {
 
 export async function cancelPt(prevState, formData) {
     const me = await requireRole('member');
+    const id = int(formData.get('pt_session_id'));
     const res = await sql(
         `UPDATE pt_sessions SET status = 'cancelled'
          WHERE pt_session_id = ? AND member_id = ? AND status IN ('requested','confirmed') AND starts_at > NOW() + INTERVAL 2 HOUR`,
-        [int(formData.get('pt_session_id')), me.member_id]);
+        [id, me.member_id]);
     revalidatePath('/member/training');
-    return res.affectedRows
-        ? { ok: true, message: 'Session cancelled.' }
-        : { ok: false, message: 'Sessions can only be cancelled up to 2 hours before they start.' };
+    if (!res.affectedRows) return { ok: false, message: 'Sessions can only be cancelled up to 2 hours before they start.' };
+
+    // Let the trainer know their slot is free again
+    const s = await sqlOne(
+        `SELECT u.user_id, ps.starts_at FROM pt_sessions ps
+         JOIN trainers t ON t.trainer_id = ps.trainer_id JOIN users u ON u.user_id = t.user_id
+         WHERE ps.pt_session_id = ?`, [id]);
+    await notify(s.user_id, 'pt_update', 'Personal training cancelled', `${me.full_name} cancelled the session on ${dateTime(s.starts_at)}.`);
+    revalidatePath('/trainer');
+    return { ok: true, message: 'Session cancelled. Your trainer has been told.' };
 }
 
 // ---------------------------------------------------------------- workouts (MongoDB)
@@ -134,7 +143,7 @@ export async function logWorkout(prevState, formData) {
             const value = int(formData.get(`reps_${i}_${s}`));
             const weight = Number(formData.get(`kg_${i}_${s}`));
             if (Number.isNaN(value) || value <= 0) continue;
-            if (timed) sets.push({ durationSec: value });
+            if (timed) sets.push({ durationSec: timeUnit(ex.reps) === 'min' ? value * 60 : value }); // cardio typed in minutes
             else sets.push(weight > 0 ? { reps: value, weightKg: weight } : { reps: value });
         }
         if (sets.length) exercises.push({ exerciseId: ex.exerciseId, name: ex.name, sets });
@@ -152,7 +161,7 @@ export async function logWorkout(prevState, formData) {
     try {
         await mongo().collection('workout_logs').insertOne(doc);
     } catch {
-        return { ok: false, message: 'Some values are out of range (reps 0–200, weight 0–600 kg).' };
+        return { ok: false, message: 'Some values are out of range (reps 0–200, weight 0–600 kg, up to 3 hours per timed set).' };
     }
     revalidatePath('/member/workouts');
     return { ok: true, message: `Logged ${day.title}: ${exercises.length} exercises, ${exercises.reduce((n, e) => n + e.sets.length, 0)} sets.` };
@@ -284,4 +293,52 @@ export async function addCustomExercise(prevState, formData) {
     revalidatePath('/member/exercises');
     revalidatePath('/member/workouts/new');
     return { ok: true, message: `${name} added. You can now use it in your own plans.` };
+}
+
+// ---------------------------------------------------------------- profile
+
+// Phone lives in users, the rest in members: both updates in one transaction.
+// CHECK constraints (phone format, height range, emergency phone) and the
+// UNIQUE phone index are enforced by MySQL.
+export async function updateProfile(prevState, formData) {
+    const me = await requireRole('member');
+    const f = Object.fromEntries(['phone', 'height_cm', 'fitness_goal', 'emergency_contact_name', 'emergency_contact_phone']
+        .map((k) => [k, String(formData.get(k) || '').trim()]));
+    if (!/^[6-9]\d{9}$/.test(f.phone)) return { ok: false, message: 'Enter a 10-digit Indian mobile number.' };
+    if (f.emergency_contact_phone && !/^[6-9]\d{9}$/.test(f.emergency_contact_phone)) return { ok: false, message: 'Emergency contact needs a 10-digit mobile number.' };
+    if (f.emergency_contact_phone && f.emergency_contact_phone === f.phone) return { ok: false, message: 'The emergency contact should be someone else\'s number.' };
+    if (!GOALS.includes(f.fitness_goal)) return { ok: false, message: 'Pick a goal.' };
+    try {
+        await transaction(async (conn) => {
+            await conn.execute('UPDATE users SET phone = ? WHERE user_id = ?', [f.phone, me.user_id]);
+            await conn.execute(
+                `UPDATE members SET height_cm = ?, fitness_goal = ?, emergency_contact_name = ?, emergency_contact_phone = ?
+                 WHERE member_id = ?`,
+                [f.height_cm ? Number(f.height_cm) : null, f.fitness_goal, f.emergency_contact_name || null, f.emergency_contact_phone || null, me.member_id]);
+        });
+        revalidatePath('/member', 'layout');
+        return { ok: true, message: 'Profile saved.' };
+    } catch (err) {
+        if (err.errno === 1062) return { ok: false, message: 'This phone number is already registered to another account.' };
+        if (err.errno === 3819 && err.sqlMessage.includes('height')) return { ok: false, message: 'Height must be between 100 and 250 cm.' };
+        return fail(err);
+    }
+}
+
+export async function changePassword(prevState, formData) {
+    const me = await requireRole('member');
+    const current = String(formData.get('current') || '');
+    const next = String(formData.get('password') || '');
+    if (next.length < 8 || !/\d/.test(next) || !/[A-Za-z]/.test(next)) {
+        return { ok: false, message: 'New password needs at least 8 characters with letters and numbers.' };
+    }
+    if (next !== String(formData.get('confirm') || '')) return { ok: false, message: 'The two new passwords do not match.' };
+    if (next === current) return { ok: false, message: 'Choose a password different from the current one.' };
+
+    const row = await sqlOne('SELECT password_hash FROM users WHERE user_id = ?', [me.user_id]);
+    if (!(await bcrypt.compare(current, row.password_hash))) return { ok: false, message: 'Current password is wrong.' };
+    // trg_users_bu records password_changed_at
+    await sql('UPDATE users SET password_hash = ? WHERE user_id = ?', [await bcrypt.hash(next, 12), me.user_id]);
+    revalidatePath('/member/profile');
+    return { ok: true, message: 'Password changed.' };
 }
