@@ -10,9 +10,9 @@ DBMS Level 3 mini project. A web app for running a gym: memberships and payments
 
 | Role | What they can do |
 |---|---|
-| **Admin** | Dashboard (revenue, peak hours, renewals due, churn risk), front-desk check-in/out, members, selling plans, refunds, class timetable, plans, reports, audit log |
-| **Trainer** | Weekly schedule, confirm/decline/complete personal training, take class attendance, create workout plans for members |
-| **Member** | Book classes (or join the waitlist), cancel, buy/renew/freeze membership, request personal training (full-text trainer search), build their own workout plans without a trainer, add private exercises, log workouts, see progress charts, search the exercise library |
+| **Admin** | Dashboard (revenue, peak hours, renewals due, churn risk), front-desk check-in/out, members, selling plans, refunds, class timetable, plans, gym setup (rooms, class types, trainers), reports, audit log |
+| **Trainer** | Weekly schedule, confirm/decline/complete personal training, take class attendance, create workout plans for members, notifications (e.g. a member cancelled) |
+| **Member** | Book classes (or join the waitlist), cancel, buy/renew/freeze membership, request personal training (full-text trainer search), build their own workout plans without a trainer, add private exercises, log workouts (cardio in minutes), see progress charts, search the exercise library, edit their profile and change password |
 
 ## Setup
 
@@ -48,8 +48,8 @@ All demo accounts use the password **`Gym@12345`**.
 ```
 db/mysql/01_schema.sql    tables, keys, CHECK constraints, indexes, FULLTEXT, ALTER/DROP demo
 db/mysql/02_views.sql     7 views (current memberships, schedule, revenue, churn risk...)
-db/mysql/03_routines.sql  4 functions + 9 stored procedures (all multi-step ones are transactions)
-db/mysql/04_triggers.sql  17 triggers (validation, clash detection, audit log, cascade cancel)
+db/mysql/03_routines.sql  4 functions + 10 stored procedures (all multi-step ones are transactions)
+db/mysql/04_triggers.sql  18 triggers (validation, clash detection, audit log, cascade cancel)
 db/mysql/05_events.sql    scheduled events (expire memberships, close finished classes, expire unanswered PT requests)
 db/mongo/collections.mjs  MongoDB collections, $jsonSchema validators, indexes (text, TTL, time series)
 scripts/db-setup.mjs      builds everything; creates the limited app account
