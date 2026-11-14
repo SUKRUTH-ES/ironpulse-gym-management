@@ -77,12 +77,13 @@ export default async function TrainingPage({ searchParams }) {
                                         <Badge status={s.status} />
                                     </div>
                                     <p className="text-slate-500">{dateTime(s.starts_at)} · {s.price > 0 ? inr(s.price) : 'included'}</p>
-                                    {['requested', 'confirmed'].includes(s.status) && new Date(s.starts_at.replace(' ', 'T')) > new Date() && (
-                                        <ActionForm action={cancelPt} inlineMessage className="mt-1">
-                                            <input type="hidden" name="pt_session_id" value={s.pt_session_id} />
+                                    {/* the form stays mounted after cancelling so its message is still shown */}
+                                    <ActionForm action={cancelPt} inlineMessage className="mt-1">
+                                        <input type="hidden" name="pt_session_id" value={s.pt_session_id} />
+                                        {['requested', 'confirmed'].includes(s.status) && new Date(s.starts_at.replace(' ', 'T')) > new Date() && (
                                             <SubmitButton className="btn btn-secondary btn-sm">Cancel</SubmitButton>
-                                        </ActionForm>
-                                    )}
+                                        )}
+                                    </ActionForm>
                                 </li>
                             ))}
                         </ul>

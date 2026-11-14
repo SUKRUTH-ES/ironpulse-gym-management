@@ -108,14 +108,22 @@ export async function bookPt(prevState, formData) {
 
 export async function cancelPt(prevState, formData) {
     const me = await requireRole('member');
+    const id = int(formData.get('pt_session_id'));
     const res = await sql(
         `UPDATE pt_sessions SET status = 'cancelled'
          WHERE pt_session_id = ? AND member_id = ? AND status IN ('requested','confirmed') AND starts_at > NOW() + INTERVAL 2 HOUR`,
-        [int(formData.get('pt_session_id')), me.member_id]);
+        [id, me.member_id]);
     revalidatePath('/member/training');
-    return res.affectedRows
-        ? { ok: true, message: 'Session cancelled.' }
-        : { ok: false, message: 'Sessions can only be cancelled up to 2 hours before they start.' };
+    if (!res.affectedRows) return { ok: false, message: 'Sessions can only be cancelled up to 2 hours before they start.' };
+
+    // Let the trainer know their slot is free again
+    const s = await sqlOne(
+        `SELECT u.user_id, ps.starts_at FROM pt_sessions ps
+         JOIN trainers t ON t.trainer_id = ps.trainer_id JOIN users u ON u.user_id = t.user_id
+         WHERE ps.pt_session_id = ?`, [id]);
+    await notify(s.user_id, 'pt_update', 'Personal training cancelled', `${me.full_name} cancelled the session on ${dateTime(s.starts_at)}.`);
+    revalidatePath('/trainer');
+    return { ok: true, message: 'Session cancelled. Your trainer has been told.' };
 }
 
 // ---------------------------------------------------------------- workouts (MongoDB)

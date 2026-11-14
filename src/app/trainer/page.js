@@ -2,7 +2,9 @@ import { requireRole } from '@/lib/auth';
 import { sql, sqlOne } from '@/lib/db';
 import { PageHeader, Card, Stat, Badge, Empty } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
-import { updatePtStatus, markAttendance } from './actions';
+import { NotificationsCard } from '@/components/inbox';
+import { inbox } from '@/lib/notifications';
+import { updatePtStatus, markAttendance, markTrainerNotificationsRead } from './actions';
 import { inr, dateShort, dateTime, time, isoDay } from '@/lib/format';
 
 export const metadata = { title: 'My schedule' };
@@ -66,7 +68,7 @@ function Roster({ list, open }) {
 export default async function TrainerHome() {
     const me = await requireRole('trainer');
 
-    const [classes, roster, pt, stats] = await Promise.all([
+    const [classes, roster, pt, stats, notes] = await Promise.all([
         sql(`SELECT class_session_id, starts_at, ends_at, class_name, room_name, capacity, booked_count, waitlist_count, status
              FROM v_class_schedule
              WHERE trainer_id = ? AND starts_at >= CURRENT_DATE - INTERVAL 2 DAY AND starts_at < CURRENT_DATE + INTERVAL 7 DAY
@@ -91,6 +93,7 @@ export default async function TrainerHome() {
                      WHERE ps.trainer_id = ? AND pay.status = 'completed' AND pay.paid_at >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')) AS pt_revenue,
                    (SELECT avg_occupancy_pct FROM v_trainer_performance WHERE trainer_id = ?) AS occupancy`,
             [me.trainer_id, me.trainer_id, me.trainer_id]),
+        inbox(me.user_id, 5),
     ]);
     const rosterByClass = Map.groupBy(roster, (r) => r.class_session_id);
     const requests = pt.filter((p) => p.status === 'requested');
@@ -149,6 +152,8 @@ export default async function TrainerHome() {
                     ) : <Empty>No confirmed sessions.</Empty>}
                 </Card>
             </div>
+
+            <NotificationsCard notes={notes} markRead={markTrainerNotificationsRead} className="mt-6" />
 
             <Card title="Attendance" subtitle="Classes from today and the last 2 days; absentees are marked automatically, correct them here." className="mt-6">
                 {recent.length ? (

@@ -5,6 +5,7 @@ import { mongo } from '@/lib/mongo';
 import { inbox } from '@/lib/notifications';
 import { PageHeader, Card, Stat, Badge, Empty } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/forms';
+import { NotificationsCard } from '@/components/inbox';
 import { cancelBooking, markNotificationsRead } from './actions';
 import { date, dateTime, plural } from '@/lib/format';
 
@@ -32,7 +33,6 @@ export default async function MemberHome() {
         inbox(me.user_id),
         mongo().collection('workout_logs').countDocuments({ memberId: me.member_id, performedAt: { $gte: monthStart } }),
     ]);
-    const unread = notes.filter((n) => !n.readAt).length;
     const status = overview.membership_status;
 
     return (
@@ -88,20 +88,7 @@ export default async function MemberHome() {
                     ) : <Empty>Nothing booked. <Link href="/member/classes" className="text-teal-700 underline">Find a class</Link></Empty>}
                 </Card>
 
-                <Card title={`Notifications${unread ? ` (${unread} new)` : ''}`}
-                    action={unread > 0 && <form action={markNotificationsRead}><button className="text-sm text-teal-700 hover:underline">Mark read</button></form>}>
-                    {notes.length ? (
-                        <ul className="space-y-3">
-                            {notes.map((n) => (
-                                <li key={String(n._id)} className={`rounded-lg p-3 text-sm ${n.readAt ? 'bg-slate-50' : 'bg-teal-50'}`}>
-                                    <p className="font-medium text-slate-900">{n.title}</p>
-                                    {n.message && <p className="mt-0.5 text-slate-600">{n.message}</p>}
-                                    <p className="mt-1 text-xs text-slate-400">{n.createdAt.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</p>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : <Empty>No notifications.</Empty>}
-                </Card>
+                <NotificationsCard notes={notes} markRead={markNotificationsRead} />
             </div>
         </>
     );
