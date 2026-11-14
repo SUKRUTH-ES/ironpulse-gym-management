@@ -1,0 +1,709 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>IronPulse — Full Documentation</title>
+<style>
+@page { size: A4; margin: 16mm 15mm 18mm 15mm;
+        @bottom-center { content: "IronPulse — DBMS Level 3 Project · page " counter(page); font: 8.5pt "Segoe UI", Arial, sans-serif; color: #666; } }
+@page cover { @bottom-center { content: none; } }
+* { box-sizing: border-box; }
+body { font: 10.5pt/1.5 "Segoe UI", Arial, sans-serif; color: #1f2933; margin: 0; }
+h1 { font-size: 20pt; color: #0f766e; margin: 0 0 10pt; padding-bottom: 4pt; border-bottom: 2px solid #0f766e; }
+h2 { font-size: 14pt; color: #134e4a; margin: 16pt 0 6pt; break-after: avoid; }
+h3 { font-size: 12pt; margin: 12pt 0 5pt; break-after: avoid; }
+h4, h5, h6 { font-size: 10.5pt; margin: 10pt 0 4pt; break-after: avoid; }
+section { break-before: page; }
+section.cover { page: cover; break-before: auto; text-align: center; padding-top: 55mm; }
+.brand { font-size: 15pt; letter-spacing: 3px; color: #0f766e; font-weight: 700; text-transform: uppercase; }
+.title { font-size: 32pt; border: none; color: #111; margin: 6pt 0; }
+.subtitle { font-size: 13pt; color: #444; margin-bottom: 26pt; }
+table.team { margin: 0 auto 26pt; width: 70%; font-size: 11pt; }
+.meta { color: #444; font-size: 11pt; }
+ol.toc { font-size: 12pt; line-height: 2; list-style: none; padding-left: 0; }
+ol.toc a { color: #1f2933; text-decoration: none; }
+p { margin: 0 0 7pt; }
+ul, ol { margin: 0 0 8pt; padding-left: 18pt; }
+li { margin-bottom: 2pt; }
+code { font: 8.8pt Consolas, monospace; background: #f1f5f4; padding: 0 2px; border-radius: 2px; }
+pre.code { font: 8pt/1.35 Consolas, monospace; background: #f7f9f9; border: 1px solid #dfe7e6; border-left: 3px solid #0f766e;
+           padding: 6pt 8pt; white-space: pre-wrap; word-break: break-word; margin: 0 0 8pt; }
+pre.code code { background: none; padding: 0; font: inherit; }
+table { width: 100%; border-collapse: collapse; margin: 0 0 10pt; font-size: 8.6pt; }
+th, td { border: 1px solid #d5dedd; padding: 3pt 5pt; text-align: left; vertical-align: top; overflow-wrap: break-word; }
+td code { overflow-wrap: anywhere; }
+th { background: #e6f2f0; }
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+table.fr td.id { width: 46pt; font-weight: 600; color: #0f766e; white-space: nowrap; }
+figure { margin: 8pt 0 12pt; text-align: center; break-inside: avoid; }
+figure img { max-width: 100%; border: 1px solid #ccd6d4; }
+figure.screen img { max-height: 232mm; }
+figcaption { font-size: 9pt; color: #555; margin-top: 4pt; }
+.wide { break-before: page; break-after: page; }
+.wide figure { margin: 0; }
+.wide figure img { max-height: 250mm; max-width: 100%; border: none; }
+.todo { background: #fff3c4; border: 1px solid #e9c46a; padding: 5pt 8pt; }
+</style></head><body><section class="cover">
+<div class="brand">IronPulse</div>
+<h1 class="title">Gym Management System</h1>
+<p class="subtitle">DBMS Experiential Learning — Level 3 Project<br>MySQL + MongoDB with a Next.js web interface</p>
+<table class="team"><thead><tr><th>Name</th><th>SRN</th><th>GitHub</th></tr></thead><tbody><tr><td>SUKRUTH ES</td><td>PES1UG24CS160</td><td>SUKRUTH-ES</td></tr><tr><td>Gagan Eswar</td><td>PES1UG24CS165</td><td>gags6030-sudo</td></tr></tbody></table>
+<p class="meta">Course: Database Management Systems · Section C<br>Instructor: Dr. Nagasundari S<br>PES University<br>14 November 2026</p>
+<p class="meta">Repository: <a href="https://github.com/SUKRUTH-ES/ironpulse-gym-management">https://github.com/SUKRUTH-ES/ironpulse-gym-management</a></p>
+</section><section class="toc"><h1>Contents</h1><ol class="toc"><li><a href="#problem">1. Problem Statement and Motivation</a></li><li><a href="#objectives">2. Objectives</a></li><li><a href="#scope">3. Scope</a></li><li><a href="#requirements">4. Functional and Non-functional Requirements</a></li><li><a href="#architecture">5. System Architecture</a></li><li><a href="#design">6. Database Design</a></li><li><a href="#dictionary">7. Data Dictionary</a></li><li><a href="#implementation">8. Implementation</a></li><li><a href="#queries">9. Important Queries</a></li><li><a href="#screenshots">10. Screenshots</a></li><li><a href="#testing">11. Testing</a></li><li><a href="#contributions">12. Individual Contributions</a></li><li><a href="#conclusion">13. Conclusion and Future Enhancements</a></li><li><a href="#appendix">Appendix: How to Run</a></li></ol></section><section id="problem"><h1>1. Problem Statement and Motivation</h1>
+<p>A typical neighbourhood gym runs on a register book, a spreadsheet of members and a WhatsApp group. That works for
+fifty people but breaks as the gym grows: memberships expire without anyone noticing, popular classes are overbooked
+while others stay empty, two trainers get booked into the same room, payments are hard to reconcile, and nobody can say
+which members are about to stop coming.</p>
+<p><strong>IronPulse</strong> is a web-based gym management system that replaces this with one source of truth. It covers
+the whole member life-cycle — registration, buying and renewing plans, freezing them, checking in at the front desk,
+booking group classes with an automatic waitlist, requesting personal training, following workout plans and logging
+workouts — and gives the owner live business reports.</p>
+<p>The problem is a good fit for a <em>polyglot</em> database design. Money, capacity and time slots need strict
+consistency (ACID transactions, constraints, triggers), which is why they live in <strong>MySQL</strong>. Workout plans,
+workout logs and body measurements are deeply nested, change shape often and are mostly read as whole documents, which
+is why they live in <strong>MongoDB</strong>. The project is therefore not a CRUD form over one table: the business rules
+are enforced inside the databases themselves.</p></section><section id="objectives"><h1>2. Objectives</h1>
+<ol>
+<li>Design a normalised relational schema (ER model → relations) for members, plans, memberships, payments, classes,
+bookings, personal training and attendance, with every rule that can be expressed declaratively written as a key,
+foreign key or CHECK constraint.</li>
+<li>Enforce the remaining business rules <em>in the database</em> with triggers, stored procedures and functions, so the
+data stays correct even if the application has a bug.</li>
+<li>Use transactions and row locks for operations that touch several rows (buying a plan, booking the last seat,
+promoting from the waitlist, completing a paid PT session).</li>
+<li>Model training data as MongoDB documents with schema validation, and compute progress statistics with aggregation
+pipelines.</li>
+<li>Build a Next.js web interface with three roles (admin, trainer, member), forms, tables, search, filters and
+dashboards, connected through a server-side data-access layer.</li>
+<li>Apply security basics: hashed passwords, signed session cookies, role checks on every page and action, credentials
+only in environment variables, and a least-privilege database account for the app.</li>
+<li>Prove correctness with an automated test suite that runs against the real databases.</li>
+</ol></section><section id="scope"><h1>3. Scope</h1>
+<table><thead><tr><th>In scope</th><th>Out of scope (see Future enhancements)</th></tr></thead><tbody><tr><td><ul>
+<li>One gym branch with several rooms</li>
+<li>Three roles: admin (owner / front desk), trainer, member</li>
+<li>Membership plans with duration, price, weekly class limit, included PT sessions and freeze days</li>
+<li>Payments in cash / card / UPI / net banking (recorded, not processed); refunds</li>
+<li>Group classes with capacity, waitlist and attendance; personal training requests</li>
+<li>Front-desk check-in / check-out by member code</li>
+<li>Workout plans (by a trainer or self-made), workout logs, body weight, exercise library</li>
+<li>In-app notifications; reports and dashboards</li>
+</ul></td><td><ul>
+<li>Real online payment gateway</li>
+<li>Multiple branches / franchise management</li>
+<li>E-mail or SMS delivery and password reset by e-mail</li>
+<li>Mobile app, biometric or QR check-in hardware</li>
+<li>Payroll and inventory</li>
+<li>Vector / semantic search (optional in the brief, not implemented)</li>
+</ul></td></tr></tbody></table></section><section id="requirements"><h1>4. Functional and Non-functional Requirements</h1><h3>Authentication</h3><table class="fr"><tbody><tr><td class="id">FR-1</td><td>Visitors can register as a member; the database rejects ages outside 14–100, invalid phones/e-mails and duplicates.</td></tr><tr><td class="id">FR-2</td><td>Users log in with e-mail and password; sessions last 8 hours; deactivated users lose access immediately.</td></tr><tr><td class="id">FR-3</td><td>Every page and action checks the role (admin / trainer / member); other roles are redirected.</td></tr><tr><td class="id">FR-4</td><td>Members can edit their profile and change their password.</td></tr></tbody></table><h3>Admin</h3><table class="fr"><tbody><tr><td class="id">FR-5</td><td>Dashboard: active members, people in the gym now, revenue this month vs last, renewals due, churn risk, revenue chart, peak-hour heat map, today&#x27;s classes.</td></tr><tr><td class="id">FR-6</td><td>Front desk: check members in and out by member code; refuse expired or frozen members and double check-ins.</td></tr><tr><td class="id">FR-7</td><td>Members: search and filter by status / plan; member detail with history; sell plans and renewals; deactivate.</td></tr><tr><td class="id">FR-8</td><td>Payments: list and filter; refund (cancels the membership and notifies the member); payments are never deleted.</td></tr><tr><td class="id">FR-9</td><td>Classes: create classes up to 7 days ahead (no room or trainer clash, capacity ≤ room); cancel a class (bookings cancelled, members notified).</td></tr><tr><td class="id">FR-10</td><td>Plans: create plans and switch them off; Gym setup: add rooms, class types and trainers.</td></tr><tr><td class="id">FR-11</td><td>Reports: revenue by plan and by method, class popularity, trainer performance, most consistent members, churn risk, never-booked members, audit log.</td></tr></tbody></table><h3>Trainer</h3><table class="fr"><tbody><tr><td class="id">FR-12</td><td>Weekly schedule of classes and PT sessions; confirm, decline or complete PT requests (payment recorded in the same transaction).</td></tr><tr><td class="id">FR-13</td><td>Take attendance for a class (editable for 2 days); create workout plans for members; receive notifications.</td></tr></tbody></table><h3>Member</h3><table class="fr"><tbody><tr><td class="id">FR-14</td><td>Buy, renew, freeze and unfreeze a membership.</td></tr><tr><td class="id">FR-15</td><td>Book classes; join the waitlist when full; automatic promotion when a seat frees up (respecting the weekly limit).</td></tr><tr><td class="id">FR-16</td><td>Search trainers in plain words (full-text) and request PT sessions (≥ 2 h ahead, 06:00–22:00, no clashes).</td></tr><tr><td class="id">FR-17</td><td>Follow a trainer&#x27;s plan or build their own; add private exercises; search the exercise library.</td></tr><tr><td class="id">FR-18</td><td>Log workouts (strength sets, timed holds, cardio in minutes) and body weight; see weekly volume, personal records and weight trend.</td></tr><tr><td class="id">FR-19</td><td>Receive notifications (waitlist promotion, class cancelled, PT updates, new plan, renewal reminder).</td></tr></tbody></table>
+<h3>Non-functional</h3>
+<ul>
+<li><strong>Integrity:</strong> invalid data is refused by the database (constraints, triggers, validators), not only by the forms.</li>
+<li><strong>Concurrency:</strong> two people booking the last seat or buying overlapping plans at the same moment cannot both succeed (row locks).</li>
+<li><strong>Security:</strong> bcrypt password hashes, httpOnly signed JWT cookie, prepared statements, no credentials in code, app account without DDL rights.</li>
+<li><strong>Auditability:</strong> every change to memberships, payments and PT sessions is written to <code>audit_log</code> by triggers.</li>
+<li><strong>Maintainability:</strong> plain JavaScript and raw SQL (no ORM) so every query can be explained; one script rebuilds both databases.</li>
+</ul></section><section id="architecture"><h1>5. System Architecture</h1>
+<div class="wide"><figure class=""><img src="report-assets/architecture.png" alt=""><figcaption>Figure 1: System architecture</figcaption></figure></div>
+<p>IronPulse is a three-tier web application.</p>
+<ul>
+<li><strong>Presentation:</strong> pages are React Server Components rendered on the server, so the browser receives
+ready HTML (tables, forms, SVG charts). Forms submit to <em>Server Actions</em>; a few small client components only keep
+form state and show messages.</li>
+<li><strong>Application / API layer:</strong> the Next.js 16 server. <code>src/proxy.js</code> checks the session cookie
+before any protected page; every page and action then calls <code>requireRole()</code> from <code>src/lib/auth.js</code>,
+which verifies the JWT and re-reads the user from MySQL. <code>src/lib/db.js</code> wraps a <code>mysql2</code>
+connection pool (prepared statements, <code>callProcedure()</code> for stored procedures, <code>transaction()</code>
+for multi-statement work) and <code>src/lib/mongo.js</code> holds one shared MongoDB client.</li>
+<li><strong>Data:</strong> MySQL 8 (<code>gym_db</code>) and MongoDB 8 (<code>gym_mongo</code>). The app connects to
+MySQL as <code>gym_app</code>, which may only SELECT, INSERT, UPDATE, DELETE and EXECUTE. Tables, triggers, routines and
+events are created once by <code>npm run db:setup</code> using the MySQL root account.</li>
+</ul>
+<p>All connection settings and the session secret come from <code>.env.local</code>, which is not in Git
+(<code>.env.example</code> lists the names).</p></section><section id="design"><h1>6. Database Design</h1>
+<h2>6.1 ER diagram</h2>
+<div class="wide"><figure class=""><img src="report-assets/er-diagram.png" alt=""><figcaption>Figure 2: ER diagram (Elmasri/Navathe notation with (min,max) participation)</figcaption></figure></div>
+<p>Notation: rectangles are entity types, diamonds relationship types, ovals attributes (key attributes underlined,
+derived attributes dashed). A double line means total participation (min ≥ 1); each line carries the (min,max) pair of the
+entity it touches.</p>
+<ul>
+<li><strong>Specialisation:</strong> USER is specialised (disjoint, partial) into MEMBER and TRAINER. Admins are users that
+belong to neither subclass.</li>
+<li><strong>Weak entity:</strong> ATTENDANCE (a visit) has no identity of its own; it is identified by its owner MEMBER through
+the identifying relationship CHECKS_IN and the partial key Check_in.</li>
+<li><strong>M:N relationship with attributes:</strong> BOOKS between MEMBER and CLASS_SESSION carries Status and Booked_at
+(Booked_at decides the waitlist order).</li>
+<li><strong>Composite attribute:</strong> Emergency_contact(Name, Phone). <strong>Derived:</strong> Age, Days_left,
+Seats_left, Duration — computed in views, never stored.</li>
+<li><strong>Roles:</strong> a PAYMENT is made by a member (<em>Payer</em>) and may be recorded by a staff user
+(<em>Recorder</em>); a PAYMENT pays for exactly one MEMBERSHIP or one PT_SESSION.</li>
+<li>AUDIT_LOG stands alone: it is written only by triggers and refers to rows by table name and id.</li>
+</ul>
+
+<h2>6.2 Mapping the ER model to relations</h2>
+<table><thead><tr><th>ER construct</th><th>Relational design</th></tr></thead><tbody>
+<tr><td>Strong entities</td><td>One table each with a surrogate AUTO_INCREMENT primary key; natural keys (email, phone, member_code, plan/room/class-type names, transaction_ref) are UNIQUE.</td></tr>
+<tr><td>USER specialisation</td><td>Superclass table <code>users</code> (with <code>role</code>) plus one table per subclass (<code>members</code>, <code>trainers</code>) whose <code>user_id</code> is a UNIQUE foreign key, ON DELETE CASCADE.</td></tr>
+<tr><td>1:N relationships (HOLDS, OF_PLAN, TEACHES, OF_TYPE, HELD_IN, REQUESTS, CONDUCTS, MAKES, RECORDS)</td><td>Foreign key on the N side; NOT NULL where participation is total.</td></tr>
+<tr><td>PAYS_FOR / COVERS</td><td>Two nullable foreign keys in <code>payments</code> plus <code>CHECK chk_payments_target</code>: exactly one of them is set.</td></tr>
+<tr><td>M:N BOOKS</td><td>Table <code>class_bookings</code> with both foreign keys, UNIQUE(class_session_id, member_id) and the relationship attributes.</td></tr>
+<tr><td>Weak ATTENDANCE</td><td>Table <code>attendance</code> with the owner's key <code>member_id</code>; a surrogate key replaces (member_id, check_in) for simpler references.</td></tr>
+<tr><td>Composite attribute</td><td>Flattened into <code>emergency_contact_name</code>, <code>emergency_contact_phone</code>.</td></tr>
+<tr><td>Derived attributes</td><td>Computed in views (<code>v_member_overview.age</code>, <code>v_current_memberships.days_left</code>, <code>v_class_schedule.seats_left</code>).</td></tr>
+</tbody></table>
+
+<h2>6.3 Relational schema</h2>
+<div class="wide"><figure class=""><img src="report-assets/relational-schema.png" alt=""><figcaption>Figure 3: Relational schema: 13 tables and 16 foreign keys (generated from information_schema)</figcaption></figure></div>
+
+<h2>6.4 Normalisation</h2>
+<p>All tables are in third normal form: every non-key column depends on the whole key and only on the key. Repeating or
+multi-valued data was split out (a member's memberships, a class's bookings, a member's visits), and descriptive data is
+stored once (plan details in <code>membership_plans</code>, room capacity in <code>rooms</code>, trainer rates in
+<code>trainers</code>). Values that could be derived are not stored; they are computed by views.</p>
+<p>Three columns look redundant but are deliberate:</p>
+<ul>
+<li><code>pt_sessions.price</code> and <code>class_sessions.capacity</code> are snapshots: a trainer's rate or a room
+may change later, but a past session must keep the price and capacity it had.</li>
+<li><code>payments.member_id</code> records the payer directly, so payment history needs no join through two optional
+foreign keys.</li>
+<li><code>members.member_code</code> is the code printed on the card. It is derived from <code>user_id</code> once, at
+registration, and its format is guarded by a CHECK constraint.</li>
+</ul>
+
+<h2>6.5 MongoDB document model</h2>
+<div class="wide"><figure class=""><img src="report-assets/mongodb-model.png" alt=""><figcaption>Figure 4: MongoDB collections, fields, references and indexes</figcaption></figure></div>
+<p>Embedding was chosen where data is always read together (a plan's days and exercises; a log's sets). References are
+used across databases: <code>memberId</code>, <code>trainerId</code> and <code>userId</code> hold MySQL primary keys,
+and the app checks them in MySQL before writing to MongoDB. Inside MongoDB, logs point to plans and exercises by
+ObjectId.</p>
+
+<h2>6.6 Database choice and justification</h2>
+<table><thead><tr><th>Data</th><th>Where</th><th>Why</th></tr></thead><tbody>
+<tr><td>Users, members, trainers, plans, memberships, payments</td><td>MySQL</td><td>Money and entitlements must be exact. Foreign keys, CHECK constraints and ACID transactions guarantee, for example, that a refund and its membership cancellation happen together.</td></tr>
+<tr><td>Classes, bookings, PT sessions, attendance</td><td>MySQL</td><td>Capacity and time-slot rules need row locks and triggers (no double-booking, waitlist order, clash detection), and reports need JOINs, GROUP BY and window functions.</td></tr>
+<tr><td>Workout plans and logs</td><td>MongoDB</td><td>Naturally nested (plan → days → exercises; log → exercises → sets) with a variable shape (weights, timed holds, cardio). One document read replaces 4–5 joins, and the aggregation pipeline computes progress.</td></tr>
+<tr><td>Body measurements</td><td>MongoDB time-series</td><td>Append-only measurements over time; the time-series collection stores and groups them efficiently.</td></tr>
+<tr><td>Notifications</td><td>MongoDB</td><td>Short-lived inbox items with free-form metadata; a TTL index deletes them after 60 days.</td></tr>
+<tr><td>Exercise library</td><td>MongoDB</td><td>Arrays of muscles, equipment, tags and instructions; a weighted text index gives ranked search.</td></tr>
+</tbody></table></section><section id="dictionary"><h1>7. Data Dictionary</h1><p><em>Generated from the live databases by <code>docs/tools/make_dictionary.py</code> (MySQL <code>information_schema</code> + MongoDB). Do not edit by hand; re-run <code>node docs/tools/dump-schema.mjs</code> and the script after a schema change.</em></p>
+<p>MySQL database <code>gym_db</code>: <strong>13 tables, 16 foreign keys, 22 CHECK constraints, 7 views, 4 functions, 13 procedures, 18 triggers, 2 events.</strong> MongoDB database <code>gym_mongo</code>: <strong>5 collections.</strong></p>
+<p>Key: PK primary key · FK foreign key · UQ unique · Null "NO" = NOT NULL.</p>
+<h3>1. MySQL tables</h3>
+<h4>1.1 <code>users</code></h4>
+<p>Every login account (admin, trainer or member). One row per person who can sign in. <em>(rows now: 116)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>user_id</code></td><td>int unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>email</code></td><td>varchar(255)</td><td>NO</td><td>UQ</td><td></td><td>Login e-mail, stored lower-case by trigger</td></tr><tr><td><code>password_hash</code></td><td>char(60)</td><td>NO</td><td></td><td></td><td>bcrypt hash (60 chars), never the plain password</td></tr><tr><td><code>password_changed_at</code></td><td>datetime</td><td>YES</td><td></td><td></td><td>Set by trg_users_bu when the hash changes</td></tr><tr><td><code>role</code></td><td>enum('admin', 'trainer', 'member')</td><td>NO</td><td></td><td></td><td>admin / trainer / member</td></tr><tr><td><code>full_name</code></td><td>varchar(100)</td><td>NO</td><td></td><td></td><td>Display name</td></tr><tr><td><code>phone</code></td><td>char(10)</td><td>YES</td><td>UQ</td><td></td><td>Indian mobile number, 10 digits</td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td>NO</td><td></td><td>1</td><td>0 = account deactivated (cannot log in)</td></tr><tr><td><code>created_at</code></td><td>datetime</td><td>NO</td><td></td><td>CURRENT_TIMESTAMP</td><td>Account creation time</td></tr><tr><td><code>last_login_at</code></td><td>datetime</td><td>YES</td><td></td><td></td><td>Updated on each successful login</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_users_email</code>: <code>regexp_like(email,'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')</code>; <code>chk_users_name</code>: <code>(char_length(trim(full_name)) &gt;= 2)</code>; <code>chk_users_phone</code>: <code>regexp_like(phone,'^[6-9][0-9]{9}$')</code></p>
+<p><strong>Indexes:</strong> <code>uq_users_email</code> (UNIQUE email); <code>uq_users_phone</code> (UNIQUE phone)</p>
+<p><strong>Triggers:</strong> <code>trg_users_bi</code> (BEFORE INSERT), <code>trg_users_bu</code> (BEFORE UPDATE)</p>
+<h4>1.2 <code>members</code></h4>
+<p>Gym member profile; 1:1 with a users row of role member. <em>(rows now: 110)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>member_id</code></td><td>int unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>user_id</code></td><td>int unsigned</td><td>NO</td><td>FK → users.user_id (CASCADE), UQ</td><td></td><td>Login account of the member</td></tr><tr><td><code>member_code</code></td><td>char(8)</td><td>NO</td><td>UQ</td><td></td><td>Card code shown at the front desk = 'GM' + 6-digit user_id</td></tr><tr><td><code>date_of_birth</code></td><td>date</td><td>NO</td><td></td><td></td><td>Age must be 14–100 (trg_members_bi/bu)</td></tr><tr><td><code>gender</code></td><td>enum('male', 'female', 'other')</td><td>NO</td><td></td><td></td><td>male / female / other</td></tr><tr><td><code>height_cm</code></td><td>decimal(5,1)</td><td>YES</td><td></td><td></td><td>Optional, 100–250</td></tr><tr><td><code>fitness_goal</code></td><td>enum('weight_loss', 'muscle_gain', 'endurance', 'flexibility', 'general_fitness')</td><td>NO</td><td></td><td>general_fitness</td><td>Goal chosen at registration</td></tr><tr><td><code>emergency_contact_name</code></td><td>varchar(100)</td><td>YES</td><td></td><td></td><td>Composite attribute Emergency_contact (part 1)</td></tr><tr><td><code>emergency_contact_phone</code></td><td>char(10)</td><td>YES</td><td></td><td></td><td>Composite attribute Emergency_contact (part 2)</td></tr><tr><td><code>joined_on</code></td><td>date</td><td>NO</td><td></td><td>CURRENT_DATE</td><td>Registration date</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_members_code</code>: <code>regexp_like(member_code,'^GM[0-9]{6}$')</code>; <code>chk_members_ephone</code>: <code>((emergency_contact_phone is null) or regexp_like(emergency_contact_phone,'^[6-9][0-9]{9}$'))</code>; <code>chk_members_height</code>: <code>((height_cm is null) or (height_cm between 100 and 250))</code></p>
+<p><strong>Indexes:</strong> <code>uq_members_code</code> (UNIQUE member_code); <code>uq_members_user</code> (UNIQUE user_id)</p>
+<p><strong>Triggers:</strong> <code>trg_members_bi</code> (BEFORE INSERT), <code>trg_members_bu</code> (BEFORE UPDATE)</p>
+<h4>1.3 <code>trainers</code></h4>
+<p>Trainer profile; 1:1 with a users row of role trainer. <em>(rows now: 5)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>trainer_id</code></td><td>int unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>user_id</code></td><td>int unsigned</td><td>NO</td><td>FK → users.user_id (CASCADE), UQ</td><td></td><td>Login account of the trainer</td></tr><tr><td><code>specialization</code></td><td>varchar(100)</td><td>NO</td><td></td><td></td><td>Searched with FULLTEXT (MATCH … AGAINST)</td></tr><tr><td><code>bio</code></td><td>text</td><td>YES</td><td></td><td></td><td>Free text, FULLTEXT-indexed</td></tr><tr><td><code>experience_years</code></td><td>tinyint unsigned</td><td>NO</td><td></td><td>0</td><td>0–50</td></tr><tr><td><code>session_rate</code></td><td>decimal(8,2)</td><td>NO</td><td></td><td></td><td>Price of one PT hour (₹)</td></tr><tr><td><code>accepts_pt</code></td><td>tinyint(1)</td><td>NO</td><td></td><td>1</td><td>Added with ALTER TABLE; 0 hides the trainer from PT requests</td></tr><tr><td><code>hired_on</code></td><td>date</td><td>NO</td><td></td><td></td><td>Hire date</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_trainers_exp</code>: <code>(experience_years &lt;= 50)</code>; <code>chk_trainers_rate</code>: <code>(session_rate &gt; 0)</code></p>
+<p><strong>Indexes:</strong> <code>ft_trainers_profile</code> (FULLTEXT specialization,bio); <code>uq_trainers_user</code> (UNIQUE user_id)</p>
+<h4>1.4 <code>membership_plans</code></h4>
+<p>Catalogue of plans the gym sells (Monthly, Quarterly, Day Pass, …). <em>(rows now: 7)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>plan_id</code></td><td>smallint unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>name</code></td><td>varchar(50)</td><td>NO</td><td>UQ</td><td></td><td>Plan name shown to members</td></tr><tr><td><code>description</code></td><td>varchar(255)</td><td>YES</td><td></td><td></td><td>Marketing text</td></tr><tr><td><code>duration_days</code></td><td>smallint unsigned</td><td>NO</td><td></td><td></td><td>1–730 days</td></tr><tr><td><code>price</code></td><td>decimal(10,2)</td><td>NO</td><td></td><td></td><td>Price in ₹</td></tr><tr><td><code>classes_per_week</code></td><td>tinyint unsigned</td><td>YES</td><td></td><td></td><td>NULL = unlimited group classes</td></tr><tr><td><code>pt_sessions_included</code></td><td>tinyint unsigned</td><td>NO</td><td></td><td>0</td><td>Free PT sessions per membership</td></tr><tr><td><code>max_freeze_days</code></td><td>smallint unsigned</td><td>NO</td><td></td><td>0</td><td>Total days the membership may be frozen (≤ duration)</td></tr><tr><td><code>is_active</code></td><td>tinyint(1)</td><td>NO</td><td></td><td>1</td><td>0 = no longer sold (old memberships keep it)</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_plans_duration</code>: <code>(duration_days between 1 and 730)</code>; <code>chk_plans_freeze</code>: <code>(max_freeze_days &lt;= duration_days)</code>; <code>chk_plans_price</code>: <code>(price &gt;= 0)</code></p>
+<p><strong>Indexes:</strong> <code>uq_plans_name</code> (UNIQUE name)</p>
+<h4>1.5 <code>memberships</code></h4>
+<p>One purchased plan period for a member (renewals are new rows queued after the current one). <em>(rows now: 371)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>membership_id</code></td><td>int unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>member_id</code></td><td>int unsigned</td><td>NO</td><td>FK → members.member_id</td><td></td><td>Owner</td></tr><tr><td><code>plan_id</code></td><td>smallint unsigned</td><td>NO</td><td>FK → membership_plans.plan_id</td><td></td><td>Plan bought</td></tr><tr><td><code>start_date</code></td><td>date</td><td>NO</td><td></td><td></td><td>First valid day</td></tr><tr><td><code>end_date</code></td><td>date</td><td>NO</td><td></td><td></td><td>Last valid day; filled from the plan by trigger if NULL</td></tr><tr><td><code>status</code></td><td>enum('active', 'frozen', 'expired', 'cancelled')</td><td>NO</td><td></td><td>active</td><td>active / frozen / expired (event) / cancelled (refund)</td></tr><tr><td><code>freeze_days_used</code></td><td>smallint unsigned</td><td>NO</td><td></td><td>0</td><td>Days frozen so far</td></tr><tr><td><code>frozen_from</code></td><td>date</td><td>YES</td><td></td><td></td><td>Set only while status = frozen</td></tr><tr><td><code>created_at</code></td><td>datetime</td><td>NO</td><td></td><td>CURRENT_TIMESTAMP</td><td>Purchase time</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_memberships_dates</code>: <code>(end_date &gt;= start_date)</code>; <code>chk_memberships_frozen</code>: <code>((status = 'frozen') = (frozen_from is not null))</code></p>
+<p><strong>Indexes:</strong> <code>fk_memberships_plan</code> (plan_id); <code>idx_memberships_member_dates</code> (member_id,start_date,end_date); <code>idx_memberships_status_end</code> (status,end_date)</p>
+<p><strong>Triggers:</strong> <code>trg_memberships_au</code> (AFTER UPDATE), <code>trg_memberships_bi</code> (BEFORE INSERT), <code>trg_memberships_bu</code> (BEFORE UPDATE)</p>
+<h4>1.6 <code>payments</code></h4>
+<p>Money received, either for a membership or for a PT session. Never deleted; refunds change the status. <em>(rows now: 400)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>payment_id</code></td><td>int unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>member_id</code></td><td>int unsigned</td><td>NO</td><td>FK → members.member_id</td><td></td><td>Payer</td></tr><tr><td><code>membership_id</code></td><td>int unsigned</td><td>YES</td><td>FK → memberships.membership_id</td><td></td><td>Set for a membership payment</td></tr><tr><td><code>pt_session_id</code></td><td>int unsigned</td><td>YES</td><td>FK → pt_sessions.pt_session_id</td><td></td><td>Set for a PT payment</td></tr><tr><td><code>amount</code></td><td>decimal(10,2)</td><td>NO</td><td></td><td></td><td>&gt; 0</td></tr><tr><td><code>method</code></td><td>enum('cash', 'card', 'upi', 'netbanking')</td><td>NO</td><td></td><td></td><td>cash / card / upi / netbanking</td></tr><tr><td><code>status</code></td><td>enum('completed', 'refunded')</td><td>NO</td><td></td><td>completed</td><td>completed / refunded (never back)</td></tr><tr><td><code>transaction_ref</code></td><td>varchar(40)</td><td>NO</td><td>UQ</td><td></td><td>Unique receipt reference</td></tr><tr><td><code>paid_at</code></td><td>datetime</td><td>NO</td><td></td><td>CURRENT_TIMESTAMP</td><td>Payment time</td></tr><tr><td><code>recorded_by</code></td><td>int unsigned</td><td>YES</td><td>FK → users.user_id</td><td></td><td>Staff user who took the payment (NULL = online)</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_payments_amount</code>: <code>(amount &gt; 0)</code>; <code>chk_payments_target</code>: <code>(((membership_id is not null) + (pt_session_id is not null)) = 1)</code></p>
+<p><strong>Indexes:</strong> <code>fk_payments_membership</code> (membership_id); <code>fk_payments_pt</code> (pt_session_id); <code>fk_payments_recorder</code> (recorded_by); <code>idx_payments_member</code> (member_id,paid_at); <code>idx_payments_paid_at</code> (paid_at); <code>uq_payments_ref</code> (UNIQUE transaction_ref)</p>
+<p><strong>Triggers:</strong> <code>trg_payments_ai</code> (AFTER INSERT), <code>trg_payments_au</code> (AFTER UPDATE), <code>trg_payments_bd</code> (BEFORE DELETE), <code>trg_payments_bu</code> (BEFORE UPDATE)</p>
+<h4>1.7 <code>rooms</code></h4>
+<p>Physical studios where group classes take place. <em>(rows now: 4)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>room_id</code></td><td>smallint unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>name</code></td><td>varchar(50)</td><td>NO</td><td>UQ</td><td></td><td>Room name</td></tr><tr><td><code>capacity</code></td><td>smallint unsigned</td><td>NO</td><td></td><td></td><td>Max people, 1–200</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_rooms_capacity</code>: <code>(capacity between 1 and 200)</code></p>
+<p><strong>Indexes:</strong> <code>uq_rooms_name</code> (UNIQUE name)</p>
+<h4>1.8 <code>class_types</code></h4>
+<p>Kinds of group class (Yoga, HIIT, Spin, …). <em>(rows now: 10)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>class_type_id</code></td><td>smallint unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>name</code></td><td>varchar(50)</td><td>NO</td><td>UQ</td><td></td><td>Class name</td></tr><tr><td><code>description</code></td><td>text</td><td>YES</td><td></td><td></td><td>FULLTEXT-indexed text</td></tr><tr><td><code>intensity</code></td><td>enum('low', 'medium', 'high')</td><td>NO</td><td></td><td></td><td>low / medium / high</td></tr><tr><td><code>duration_min</code></td><td>smallint unsigned</td><td>NO</td><td></td><td></td><td>Default length, 15–180 minutes</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_class_types_duration</code>: <code>(duration_min between 15 and 180)</code></p>
+<p><strong>Indexes:</strong> <code>ft_class_types</code> (FULLTEXT name,description); <code>uq_class_types_name</code> (UNIQUE name)</p>
+<h4>1.9 <code>class_sessions</code></h4>
+<p>One scheduled occurrence of a class type, with a trainer, a room and a time. <em>(rows now: 339)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>class_session_id</code></td><td>int unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>class_type_id</code></td><td>smallint unsigned</td><td>NO</td><td>FK → class_types.class_type_id</td><td></td><td>What is taught</td></tr><tr><td><code>trainer_id</code></td><td>int unsigned</td><td>NO</td><td>FK → trainers.trainer_id</td><td></td><td>Instructor</td></tr><tr><td><code>room_id</code></td><td>smallint unsigned</td><td>NO</td><td>FK → rooms.room_id</td><td></td><td>Where</td></tr><tr><td><code>starts_at</code></td><td>datetime</td><td>NO</td><td></td><td></td><td>Start time (max 7 days ahead, checked in the app)</td></tr><tr><td><code>ends_at</code></td><td>datetime</td><td>NO</td><td></td><td></td><td>Filled from class_types.duration_min by trigger if NULL</td></tr><tr><td><code>capacity</code></td><td>smallint unsigned</td><td>NO</td><td></td><td></td><td>Seats; trigger checks ≤ room capacity</td></tr><tr><td><code>status</code></td><td>enum('scheduled', 'cancelled', 'completed')</td><td>NO</td><td></td><td>scheduled</td><td>scheduled / cancelled / completed (event)</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_cs_capacity</code>: <code>(capacity &gt; 0)</code>; <code>chk_cs_times</code>: <code>(ends_at &gt; starts_at)</code></p>
+<p><strong>Indexes:</strong> <code>fk_cs_type</code> (class_type_id); <code>idx_cs_room</code> (room_id,starts_at); <code>idx_cs_starts</code> (starts_at); <code>idx_cs_trainer</code> (trainer_id,starts_at)</p>
+<p><strong>Triggers:</strong> <code>trg_class_sessions_au</code> (AFTER UPDATE), <code>trg_class_sessions_bi</code> (BEFORE INSERT), <code>trg_class_sessions_bu</code> (BEFORE UPDATE)</p>
+<h4>1.10 <code>class_bookings</code></h4>
+<p>M:N between members and class sessions: a booking or a waitlist place. <em>(rows now: 3934)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>booking_id</code></td><td>int unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>class_session_id</code></td><td>int unsigned</td><td>NO</td><td>FK → class_sessions.class_session_id</td><td></td><td>Class booked</td></tr><tr><td><code>member_id</code></td><td>int unsigned</td><td>NO</td><td>FK → members.member_id</td><td></td><td>Who booked</td></tr><tr><td><code>status</code></td><td>enum('booked', 'waitlisted', 'cancelled', 'attended', 'no_show')</td><td>NO</td><td></td><td></td><td>booked / waitlisted / cancelled / attended / no_show</td></tr><tr><td><code>booked_at</code></td><td>datetime(3)</td><td>NO</td><td></td><td>CURRENT_TIMESTAMP(3)</td><td>Millisecond precision → fair waitlist order</td></tr><tr><td><code>updated_at</code></td><td>datetime</td><td>NO</td><td></td><td>CURRENT_TIMESTAMP</td><td>Last status change</td></tr></tbody></table>
+<p><strong>Indexes:</strong> <code>idx_cb_member</code> (member_id,status); <code>idx_cb_session_status</code> (class_session_id,status,booked_at); <code>uq_cb_member_session</code> (UNIQUE class_session_id,member_id)</p>
+<h4>1.11 <code>pt_sessions</code></h4>
+<p>One-to-one personal-training session requested by a member with a trainer. <em>(rows now: 168)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>pt_session_id</code></td><td>int unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>trainer_id</code></td><td>int unsigned</td><td>NO</td><td>FK → trainers.trainer_id</td><td></td><td>Trainer</td></tr><tr><td><code>member_id</code></td><td>int unsigned</td><td>NO</td><td>FK → members.member_id</td><td></td><td>Client</td></tr><tr><td><code>starts_at</code></td><td>datetime</td><td>NO</td><td></td><td></td><td>≥ 2 h ahead, 06:00–22:00</td></tr><tr><td><code>ends_at</code></td><td>datetime</td><td>NO</td><td></td><td></td><td>Start + 30/45/60/90 min</td></tr><tr><td><code>status</code></td><td>enum('requested', 'confirmed', 'completed', 'cancelled')</td><td>NO</td><td></td><td>requested</td><td>requested → confirmed → completed, or cancelled</td></tr><tr><td><code>price</code></td><td>decimal(8,2)</td><td>NO</td><td></td><td></td><td>0 when covered by the plan, else trainer rate</td></tr><tr><td><code>member_note</code></td><td>varchar(255)</td><td>YES</td><td></td><td></td><td>Request message</td></tr><tr><td><code>created_at</code></td><td>datetime</td><td>NO</td><td></td><td>CURRENT_TIMESTAMP</td><td>Request time</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_pt_price</code>: <code>(price &gt;= 0)</code>; <code>chk_pt_times</code>: <code>(ends_at &gt; starts_at)</code></p>
+<p><strong>Indexes:</strong> <code>idx_pt_member</code> (member_id,starts_at); <code>idx_pt_trainer</code> (trainer_id,starts_at)</p>
+<p><strong>Triggers:</strong> <code>trg_pt_sessions_au</code> (AFTER UPDATE), <code>trg_pt_sessions_bi</code> (BEFORE INSERT), <code>trg_pt_sessions_bu</code> (BEFORE UPDATE)</p>
+<h4>1.12 <code>attendance</code></h4>
+<p>Gym visits recorded at the front desk (check-in / check-out). <em>(rows now: 7648)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>attendance_id</code></td><td>bigint unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key (partial key in the ER model is check_in)</td></tr><tr><td><code>member_id</code></td><td>int unsigned</td><td>NO</td><td>FK → members.member_id</td><td></td><td>Visitor</td></tr><tr><td><code>check_in</code></td><td>datetime</td><td>NO</td><td></td><td></td><td>Arrival time</td></tr><tr><td><code>check_out</code></td><td>datetime</td><td>YES</td><td></td><td></td><td>NULL while inside; auto-closed after 4 h by event</td></tr></tbody></table>
+<p><strong>CHECK constraints:</strong> <code>chk_attendance_times</code>: <code>((check_out is null) or (check_out &gt; check_in))</code></p>
+<p><strong>Indexes:</strong> <code>idx_attendance_check_in</code> (check_in); <code>idx_attendance_member</code> (member_id,check_in)</p>
+<p><strong>Triggers:</strong> <code>trg_attendance_bi</code> (BEFORE INSERT)</p>
+<h4>1.13 <code>audit_log</code></h4>
+<p>History of changes to memberships, payments and PT sessions, written only by triggers. <em>(rows now: 683)</em></p>
+<table><thead><tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>audit_id</code></td><td>bigint unsigned AUTO_INCREMENT</td><td>NO</td><td>PK</td><td></td><td>Surrogate key</td></tr><tr><td><code>table_name</code></td><td>varchar(64)</td><td>NO</td><td></td><td></td><td>Table that changed</td></tr><tr><td><code>record_id</code></td><td>bigint unsigned</td><td>NO</td><td></td><td></td><td>PK of the changed row</td></tr><tr><td><code>action</code></td><td>enum('INSERT', 'UPDATE', 'DELETE')</td><td>NO</td><td></td><td></td><td>INSERT / UPDATE / DELETE</td></tr><tr><td><code>old_value</code></td><td>json</td><td>YES</td><td></td><td></td><td>Row before (JSON)</td></tr><tr><td><code>new_value</code></td><td>json</td><td>YES</td><td></td><td></td><td>Row after (JSON)</td></tr><tr><td><code>changed_by</code></td><td>varchar(288)</td><td>NO</td><td></td><td></td><td>MySQL account (USER())</td></tr><tr><td><code>changed_at</code></td><td>datetime</td><td>NO</td><td></td><td>CURRENT_TIMESTAMP</td><td>Time of change</td></tr></tbody></table>
+<p><strong>Indexes:</strong> <code>idx_audit_table_record</code> (table_name,record_id)</p>
+<h3>2. Views</h3>
+<table><thead><tr><th>View</th><th>Purpose</th><th>Columns</th></tr></thead><tbody><tr><td><code>v_churn_risk</code></td><td>Members whose visits in the last 30 days fell below half of the 30 days before.</td><td>member_id, member_code, full_name, phone, plan_name, membership_end, last_visit, visits_prev_30, visits_last_30, days_since_last_visit</td></tr><tr><td><code>v_class_schedule</code></td><td>Classes with type, trainer, room, booked_count, waitlist_count, seats_left.</td><td>class_session_id, starts_at, ends_at, status, capacity, class_type_id, class_name, intensity, trainer_id, trainer_name, room_id, room_name, booked_count, waitlist_count, seats_left</td></tr><tr><td><code>v_current_memberships</code></td><td>Membership valid today per member, with plan limits and days_left.</td><td>membership_id, member_id, plan_id, plan_name, start_date, end_date, status, frozen_from, freeze_days_used, max_freeze_days, classes_per_week, pt_sessions_included, days_left</td></tr><tr><td><code>v_expiring_memberships</code></td><td>Active memberships ending in the next 7 days with no renewal queued.</td><td>membership_id, member_id, full_name, email, phone, plan_name, end_date, days_left</td></tr><tr><td><code>v_member_overview</code></td><td>One row per member: profile, age, current plan, status (active/frozen/expired/none), last visit.</td><td>member_id, member_code, user_id, full_name, email, phone, is_active, gender, date_of_birth, age, fitness_goal, joined_on, membership_id, plan_name, membership_end, days_left, membership_status, last_visit</td></tr><tr><td><code>v_monthly_revenue</code></td><td>Revenue per month split into memberships and PT (completed payments only).</td><td>month, membership_revenue, pt_revenue, total_revenue, payment_count</td></tr><tr><td><code>v_trainer_performance</code></td><td>Classes taught, average occupancy %, completed PT sessions and PT revenue per trainer.</td><td>trainer_id, trainer_name, specialization, classes_taught, avg_occupancy_pct, pt_sessions_completed, pt_revenue</td></tr></tbody></table>
+<h3>3. Stored routines, triggers and events</h3>
+<p><strong>Functions:</strong> <code>fn_active_membership_id</code>, <code>fn_classes_booked_in_week</code>, <code>fn_member_status</code>, <code>fn_pt_sessions_used</code></p>
+<p><strong>Procedures:</strong> <code>sp_add_trainer</code>, <code>sp_assert_trainer_free</code>, <code>sp_book_class</code>, <code>sp_book_pt_session</code>, <code>sp_cancel_class_booking</code>, <code>sp_check_in</code>, <code>sp_check_out</code>, <code>sp_close_finished_classes</code>, <code>sp_expire_memberships</code>, <code>sp_freeze_membership</code>, <code>sp_purchase_membership</code>, <code>sp_register_member</code>, <code>sp_unfreeze_membership</code></p>
+<p><strong>Events:</strong> <code>ev_daily_housekeeping</code> (every 1 day, enabled), <code>ev_class_housekeeping</code> (every 15 minute, enabled)</p>
+<h3>4. MongoDB collections</h3>
+<h4>4.1 <code>exercises</code></h4>
+<p>Exercise library (shared) plus member-private exercises (createdBy = member_id). <em>(documents now: 38)</em></p>
+<p>Validator: <code>$jsonSchema</code>, validationLevel <code>strict</code>, validationAction <code>error</code></p>
+<table><thead><tr><th>Field</th><th>BSON type</th><th>Required</th><th>Rule</th><th>Description</th></tr></thead><tbody><tr><td><code>name</code></td><td>string</td><td>yes</td><td>minLength 2</td><td></td></tr><tr><td><code>slug</code></td><td>string</td><td>yes</td><td>pattern ^[a-z0-9-]+$</td><td>URL-safe unique name</td></tr><tr><td><code>category</code></td><td>enum</td><td>yes</td><td>one of strength, cardio, mobility, plyometric</td><td></td></tr><tr><td><code>primaryMuscle</code></td><td>string</td><td>yes</td><td></td><td></td></tr><tr><td><code>secondaryMuscles</code></td><td>array</td><td></td><td></td><td></td></tr><tr><td><code>equipment</code></td><td>array</td><td>yes</td><td></td><td></td></tr><tr><td><code>level</code></td><td>enum</td><td>yes</td><td>one of beginner, intermediate, advanced</td><td></td></tr><tr><td><code>instructions</code></td><td>array</td><td>yes</td><td>minItems 1</td><td>Step-by-step text (text-indexed)</td></tr><tr><td><code>tags</code></td><td>array</td><td></td><td></td><td>Search keywords (text-indexed)</td></tr><tr><td><code>createdBy</code></td><td>int</td><td></td><td></td><td>member_id for a private exercise; null/absent = shared</td></tr></tbody></table>
+<p><strong>Indexes:</strong> <code>uq_slug</code> (slug: 1 · unique); <code>muscle_level</code> (primaryMuscle: 1, level: 1); <code>by_creator</code> (createdBy: 1); <code>txt_exercise_search</code> (_fts: text, _ftsx: 1 · weights instructions 1, name 10, primaryMuscle 6, tags 4)</p>
+<h4>4.2 <code>workout_plans</code></h4>
+<p>Workout plans: built by a trainer (trainerId) or by the member (trainerId null). Days and exercises embedded. <em>(documents now: 45)</em></p>
+<p>Validator: <code>$jsonSchema</code>, validationLevel <code>strict</code>, validationAction <code>error</code></p>
+<table><thead><tr><th>Field</th><th>BSON type</th><th>Required</th><th>Rule</th><th>Description</th></tr></thead><tbody><tr><td><code>memberId</code></td><td>int</td><td>yes</td><td></td><td>MySQL members.member_id (reference by value)</td></tr><tr><td><code>trainerId</code></td><td>int | null</td><td></td><td></td><td>MySQL trainers.trainer_id; null = self-made plan</td></tr><tr><td><code>title</code></td><td>string</td><td>yes</td><td>minLength 3; maxLength 100</td><td></td></tr><tr><td><code>goal</code></td><td>enum</td><td>yes</td><td>one of weight_loss, muscle_gain, endurance, flexibility, general_fitness</td><td></td></tr><tr><td><code>durationWeeks</code></td><td>int</td><td></td><td>minimum 1; maximum 52</td><td></td></tr><tr><td><code>status</code></td><td>enum</td><td>yes</td><td>one of active, archived</td><td>Only one active plan per member</td></tr><tr><td><code>days</code></td><td>array</td><td>yes</td><td>minItems 1; maxItems 7</td><td>Embedded training days</td></tr><tr><td><code>days[].day</code></td><td>int</td><td>yes</td><td>minimum 1; maximum 7</td><td></td></tr><tr><td><code>days[].title</code></td><td>string</td><td>yes</td><td></td><td></td></tr><tr><td><code>days[].exercises</code></td><td>array</td><td>yes</td><td>minItems 1</td><td>Embedded exercise prescriptions</td></tr><tr><td><code>days[].exercises[].exerciseId</code></td><td>objectId</td><td>yes</td><td></td><td>exercises._id</td></tr><tr><td><code>days[].exercises[].name</code></td><td>string</td><td>yes</td><td></td><td></td></tr><tr><td><code>days[].exercises[].sets</code></td><td>int</td><td>yes</td><td>minimum 1; maximum 10</td><td></td></tr><tr><td><code>days[].exercises[].reps</code></td><td>string</td><td></td><td></td><td></td></tr><tr><td><code>days[].exercises[].restSec</code></td><td>int</td><td></td><td>minimum 0; maximum 600</td><td></td></tr><tr><td><code>days[].exercises[].notes</code></td><td>string</td><td></td><td></td><td></td></tr><tr><td><code>createdAt</code></td><td>date</td><td>yes</td><td></td><td></td></tr><tr><td><code>updatedAt</code></td><td>date</td><td></td><td></td><td></td></tr></tbody></table>
+<p><strong>Indexes:</strong> <code>member_status</code> (memberId: 1, status: 1); <code>trainer_recent</code> (trainerId: 1, createdAt: -1)</p>
+<h4>4.3 <code>workout_logs</code></h4>
+<p>One document per finished workout, with embedded sets and cardio entries. <em>(documents now: 1151)</em></p>
+<p>Validator: <code>$jsonSchema</code>, validationLevel <code>strict</code>, validationAction <code>error</code></p>
+<table><thead><tr><th>Field</th><th>BSON type</th><th>Required</th><th>Rule</th><th>Description</th></tr></thead><tbody><tr><td><code>memberId</code></td><td>int</td><td>yes</td><td></td><td>MySQL members.member_id (reference by value)</td></tr><tr><td><code>planId</code></td><td>objectId | null</td><td></td><td></td><td>workout_plans._id the workout followed</td></tr><tr><td><code>performedAt</code></td><td>date</td><td>yes</td><td></td><td>When the workout happened</td></tr><tr><td><code>durationMin</code></td><td>int</td><td>yes</td><td>minimum 5; maximum 300</td><td></td></tr><tr><td><code>rpe</code></td><td>int</td><td></td><td>minimum 1; maximum 10</td><td>Rate of perceived exertion</td></tr><tr><td><code>notes</code></td><td>string</td><td></td><td>maxLength 500</td><td></td></tr><tr><td><code>exercises</code></td><td>array</td><td></td><td></td><td>Exercises done in this workout</td></tr><tr><td><code>exercises[].exerciseId</code></td><td>objectId</td><td>yes</td><td></td><td>exercises._id</td></tr><tr><td><code>exercises[].name</code></td><td>string</td><td>yes</td><td></td><td></td></tr><tr><td><code>exercises[].sets</code></td><td>array</td><td>yes</td><td>minItems 1</td><td>One entry per set</td></tr><tr><td><code>exercises[].sets[].reps</code></td><td>int</td><td></td><td>minimum 0; maximum 200</td><td></td></tr><tr><td><code>exercises[].sets[].weightKg</code></td><td>double | int</td><td></td><td>minimum 0; maximum 600</td><td></td></tr><tr><td><code>exercises[].sets[].durationSec</code></td><td>int</td><td></td><td>minimum 1; maximum 10800</td><td>For timed/cardio items (app asks minutes)</td></tr><tr><td><code>cardio</code></td><td>array</td><td></td><td></td><td>Cardio blocks</td></tr><tr><td><code>cardio[].activity</code></td><td>string</td><td>yes</td><td></td><td></td></tr><tr><td><code>cardio[].minutes</code></td><td>int</td><td>yes</td><td>minimum 1; maximum 300</td><td></td></tr><tr><td><code>cardio[].distanceKm</code></td><td>double | int</td><td></td><td>minimum 0</td><td></td></tr></tbody></table>
+<p><strong>Indexes:</strong> <code>member_recent</code> (memberId: 1, performedAt: -1); <code>by_exercise</code> (exercises.exerciseId: 1)</p>
+<h4>4.4 <code>body_metrics</code> (time-series)</h4>
+<p>Time-series collection of body weight / body-fat / waist measurements. <em>(documents now: 585)</em></p>
+<p>No validator. timeField <code>recordedAt</code>, metaField <code>memberId</code>, granularity <code>hours</code>. Fields: <code>recordedAt</code> date, <code>memberId</code> int (→ members.member_id), <code>weightKg</code> double (app checks 25–300), <code>bodyFatPct</code> double (optional), <code>waistCm</code> double (optional).</p>
+<p><strong>Indexes:</strong> <code>memberId_1_recordedAt_1</code> (memberId: 1, recordedAt: 1); <code>member_time</code> (memberId: 1, recordedAt: -1)</p>
+<h4>4.5 <code>notifications</code></h4>
+<p>In-app inbox messages; deleted automatically after 60 days by a TTL index. <em>(documents now: 37)</em></p>
+<p>Validator: <code>$jsonSchema</code>, validationLevel <code>strict</code>, validationAction <code>error</code></p>
+<table><thead><tr><th>Field</th><th>BSON type</th><th>Required</th><th>Rule</th><th>Description</th></tr></thead><tbody><tr><td><code>userId</code></td><td>int</td><td>yes</td><td></td><td>MySQL users.user_id of the receiver</td></tr><tr><td><code>type</code></td><td>enum</td><td>yes</td><td>one of renewal_reminder, waitlist_promoted, class_cancelled, pt_update, plan_assigned, general</td><td>Kind of notification</td></tr><tr><td><code>title</code></td><td>string</td><td>yes</td><td></td><td></td></tr><tr><td><code>message</code></td><td>string</td><td></td><td></td><td></td></tr><tr><td><code>readAt</code></td><td>date | null</td><td></td><td></td><td>null = unread</td></tr><tr><td><code>createdAt</code></td><td>date</td><td>yes</td><td></td><td></td></tr><tr><td><code>meta</code></td><td>object</td><td></td><td></td><td>Extra data, e.g. classSessionId</td></tr></tbody></table>
+<p><strong>Indexes:</strong> <code>user_inbox</code> (userId: 1, readAt: 1, createdAt: -1); <code>ttl_60_days</code> (createdAt: 1 · TTL 60 days)</p></section><section id="implementation"><h1>8. Implementation</h1>
+<h2>8.1 SQL (MySQL 8)</h2>
+<table><thead><tr><th>Object</th><th>Count</th><th>Where / examples</th></tr></thead><tbody>
+<tr><td>Tables</td><td>13</td><td><code>db/mysql/01_schema.sql</code> — CREATE TABLE with PK, FK, UNIQUE, CHECK, DEFAULT; also an <code>ALTER TABLE trainers ADD COLUMN accepts_pt</code> and a CREATE/DROP of a temporary import table to show DDL changes</td></tr>
+<tr><td>Foreign keys / CHECK constraints</td><td>16 / 22</td><td>e.g. <code>chk_payments_target</code>, <code>chk_memberships_frozen</code>, phone and e-mail patterns with <code>REGEXP_LIKE</code></td></tr>
+<tr><td>Secondary indexes</td><td>31</td><td>composite indexes for the common lookups, two FULLTEXT indexes (<code>trainers</code>, <code>class_types</code>)</td></tr>
+<tr><td>Views</td><td>7</td><td><code>02_views.sql</code> — current memberships, member overview, expiring memberships, class schedule, monthly revenue, trainer performance, churn risk</td></tr>
+<tr><td>Functions / procedures</td><td>4 / 13</td><td><code>03_routines.sql</code> — register, add trainer, purchase, freeze, unfreeze, book class, cancel booking (with waitlist promotion), book PT, check-in, check-out; every multi-step procedure is a transaction with an EXIT HANDLER that rolls back</td></tr>
+<tr><td>Triggers</td><td>18</td><td><code>04_triggers.sql</code> — validation (age, overlaps, capacity, clashes, frozen check-in), automatic values (end dates, lower-case e-mail, password_changed_at), cascades (cancel class → cancel bookings), audit log, payments that cannot be edited or deleted</td></tr>
+<tr><td>Events</td><td>2</td><td><code>05_events.sql</code> — daily expiry of memberships; every 15 minutes close finished classes, mark no-shows, close forgotten visits, cancel stale PT requests</td></tr>
+</tbody></table>
+<p>Business errors are raised with <code>SIGNAL SQLSTATE '45000'</code> and a readable message. The app shows that
+message in the form, so the database is the single place where rules live.</p>
+
+<h2>8.2 NoSQL (MongoDB 8)</h2>
+<ul>
+<li>Five collections created by <code>db/mongo/collections.mjs</code>: exercises (38 documents now),
+workout_plans (45), workout_logs (1151),
+body_metrics (585, time-series) and notifications (37).</li>
+<li><code>$jsonSchema</code> validators (validationLevel strict, validationAction error) with types, ranges, enums,
+required fields and <code>additionalProperties: false</code> on workout sets.</li>
+<li>Indexes: unique slug, compound indexes for "my plans" and "my recent logs", a multikey index on
+<code>exercises.exerciseId</code>, a weighted text index, and a TTL index.</li>
+<li>Aggregation pipelines for weekly volume (<code>$unwind</code>, <code>$group</code> with <code>$dateTrunc</code>),
+personal records (<code>$sort</code> + <code>$first</code>), popular exercises and each trainer's member activity.</li>
+</ul>
+
+<h2>8.3 Integration with the application</h2>
+<ul>
+<li>Every SQL statement uses <code>?</code> placeholders (prepared statements), so user input can never change the query.</li>
+<li>Procedures are called through <code>callProcedure(name, inArgs, outNames)</code>, which reads the OUT parameters.</li>
+<li>Operations spanning several statements in the app (refund = payment status + membership cancel; completing a PT
+session = status + payment) run inside <code>transaction()</code>, which commits or rolls back as one unit.</li>
+<li>Passwords are hashed with bcrypt (cost 12). The session is a JWT signed with <code>SESSION_SECRET</code> (HS256, 8 hours)
+in an httpOnly, sameSite=lax cookie.</li>
+<li>Cross-database writes check MySQL first (e.g. a member must exist and be active before a plan is stored for them).</li>
+</ul></section><section id="queries"><h1>9. Important Queries</h1><p><em>Every query below is copied from the application code or the <code>db/</code> scripts, and every output table was produced by running it on the demo database with <code>node docs/tools/run-queries.mjs</code> (generated 2026-11-14). Long results are cut to the first rows.</em></p>
+<h3>1. SQL queries (MySQL <code>gym_db</code>)</h3>
+<h4>Q1. Revenue per membership plan, last 6 months</h4>
+<p><strong>Shows:</strong> three-table JOIN, WHERE with date arithmetic, GROUP BY, COUNT/SUM, ORDER BY. Used on the admin Reports page (<code>src/app/admin/reports/page.js</code>).</p>
+<pre class="code sql"><code>SELECT p.name, COUNT(*) AS sold, SUM(pay.amount) AS revenue
+FROM payments pay
+JOIN memberships ms     ON ms.membership_id = pay.membership_id
+JOIN membership_plans p ON p.plan_id = ms.plan_id
+WHERE pay.status = &#x27;completed&#x27; AND pay.paid_at &gt;= CURRENT_DATE - INTERVAL 6 MONTH
+GROUP BY p.plan_id, p.name
+ORDER BY revenue DESC;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>):</p>
+<table><thead><tr><th>name</th><th>sold</th><th>revenue</th></tr></thead><tbody><tr><td>Quarterly</td><td>68</td><td>442000.00</td></tr><tr><td>Monthly Plus</td><td>86</td><td>215000.00</td></tr><tr><td>Half-Yearly</td><td>13</td><td>149500.00</td></tr><tr><td>Monthly Basic</td><td>93</td><td>139500.00</td></tr><tr><td>Summer Shred 2026</td><td>8</td><td>31992.00</td></tr><tr><td>Annual</td><td>1</td><td>19999.00</td></tr></tbody></table>
+<h4>Q2. Class popularity — only class types with 5+ finished sessions</h4>
+<p><strong>Shows:</strong> derived table (subquery in FROM), conditional SUM, AVG, NULLIF, GROUP BY + HAVING. Reports page. The derived table counts seats used per session; HAVING filters groups after aggregation.</p>
+<pre class="code sql"><code>SELECT ct.name, COUNT(DISTINCT cs.class_session_id) AS sessions,
+       ROUND(AVG(fill.booked / cs.capacity) * 100, 1) AS avg_fill_pct,
+       ROUND(SUM(fill.no_show) / NULLIF(SUM(fill.booked), 0) * 100, 1) AS no_show_pct
+FROM class_sessions cs
+JOIN class_types ct ON ct.class_type_id = cs.class_type_id
+JOIN (SELECT class_session_id,
+             SUM(status IN (&#x27;attended&#x27;,&#x27;no_show&#x27;)) AS booked,
+             SUM(status = &#x27;no_show&#x27;) AS no_show
+      FROM class_bookings GROUP BY class_session_id) fill
+  ON fill.class_session_id = cs.class_session_id
+WHERE cs.status = &#x27;completed&#x27;
+GROUP BY ct.class_type_id, ct.name
+HAVING COUNT(DISTINCT cs.class_session_id) &gt;= 5
+ORDER BY avg_fill_pct DESC;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>):</p>
+<table><thead><tr><th>name</th><th>sessions</th><th>avg_fill_pct</th><th>no_show_pct</th></tr></thead><tbody><tr><td>Zumba</td><td>36</td><td>76.7</td><td>8.0</td></tr><tr><td>Spin Cycle</td><td>35</td><td>75.4</td><td>13.1</td></tr><tr><td>CrossFit WOD</td><td>36</td><td>70.9</td><td>12.3</td></tr><tr><td>HIIT Blast</td><td>36</td><td>67.7</td><td>10.7</td></tr><tr><td>Yoga Flow</td><td>36</td><td>60.4</td><td>8.5</td></tr><tr><td>Strength Circuit</td><td>27</td><td>58.6</td><td>11.1</td></tr><tr><td>Power Yoga</td><td>17</td><td>57.6</td><td>10.2</td></tr><tr><td>Boxing Fit</td><td>18</td><td>54.1</td><td>8.9</td></tr></tbody></table>
+<p><em>…2 more rows (10 total)</em></p>
+<h4>Q3. Top 10 most consistent members (last 30 days)</h4>
+<p><strong>Shows:</strong> window function RANK() OVER, subquery in FROM, GROUP BY. Reports page. Members with the same number of visits share a rank.</p>
+<pre class="code sql"><code>SELECT * FROM (
+    SELECT m.member_id, u.full_name, COUNT(*) AS visits,
+           RANK() OVER (ORDER BY COUNT(*) DESC) AS position
+    FROM attendance a
+    JOIN members m ON m.member_id = a.member_id
+    JOIN users u   ON u.user_id = m.user_id
+    WHERE a.check_in &gt;= CURRENT_DATE - INTERVAL 30 DAY
+    GROUP BY m.member_id, u.full_name) ranked
+WHERE position &lt;= 10
+ORDER BY position, full_name;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>):</p>
+<table><thead><tr><th>member_id</th><th>full_name</th><th>visits</th><th>position</th></tr></thead><tbody><tr><td>55</td><td>Isha Iyer</td><td>28</td><td>1</td></tr><tr><td>77</td><td>Pranav Verma</td><td>28</td><td>1</td></tr><tr><td>74</td><td>Ananya Gupta</td><td>27</td><td>3</td></tr><tr><td>45</td><td>Kunal Joshi</td><td>27</td><td>3</td></tr><tr><td>78</td><td>Priya Nair</td><td>27</td><td>3</td></tr><tr><td>61</td><td>Aarav Hegde</td><td>26</td><td>6</td></tr><tr><td>47</td><td>Gaurav Hegde</td><td>26</td><td>6</td></tr><tr><td>58</td><td>Neha Reddy</td><td>26</td><td>6</td></tr></tbody></table>
+<p><em>…10 more rows (18 total)</em></p>
+<h4>Q4. Active members who never booked a class</h4>
+<p><strong>Shows:</strong> correlated NOT EXISTS subquery on a view. Reports page — a list for the front desk to follow up.</p>
+<pre class="code sql"><code>SELECT mo.member_id, mo.full_name, mo.plan_name, mo.joined_on
+FROM v_member_overview mo
+WHERE mo.membership_status = &#x27;active&#x27;
+  AND NOT EXISTS (SELECT 1 FROM class_bookings cb WHERE cb.member_id = mo.member_id)
+ORDER BY mo.joined_on DESC;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>):</p>
+<p><em>(no rows)</em></p>
+<h4>Q5. Full-text trainer search: "back pain"</h4>
+<p><strong>Shows:</strong> FULLTEXT index <code>ft_trainers_profile</code>, MATCH … AGAINST in NATURAL LANGUAGE MODE, relevance score, prepared-statement parameters (?). Member → Training page (<code>src/app/member/training/page.js</code>). The member types a problem in plain words; MySQL ranks trainers by relevance.</p>
+<pre class="code sql"><code>SELECT t.trainer_id, u.full_name, t.specialization,
+       MATCH(t.specialization, t.bio) AGAINST (? IN NATURAL LANGUAGE MODE) AS score
+FROM trainers t JOIN users u ON u.user_id = t.user_id
+WHERE u.is_active AND MATCH(t.specialization, t.bio) AGAINST (? IN NATURAL LANGUAGE MODE)
+ORDER BY score DESC;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>, parameters ["back pain","back pain"]):</p>
+<table><thead><tr><th>trainer_id</th><th>full_name</th><th>specialization</th><th>score</th></tr></thead><tbody><tr><td>2</td><td>Kavya Iyer</td><td>Yoga, mobility and flexibility</td><td>0.9771181344985962</td></tr></tbody></table>
+<h4>Q6. View <code>v_member_overview</code> (definition + use)</h4>
+<p><strong>Shows:</strong> a view built on another view (LEFT JOIN v_current_memberships), CASE + EXISTS, a correlated scalar subquery (last_visit), derived attributes (age, days_left). Used by the admin Members list, member detail and the Reports page.</p>
+<pre class="code sql"><code>CREATE OR REPLACE VIEW v_member_overview AS
+SELECT m.member_id, m.member_code, u.user_id, u.full_name, u.email, u.phone,
+       u.is_active, m.gender, m.date_of_birth,
+       TIMESTAMPDIFF(YEAR, m.date_of_birth, CURRENT_DATE) AS age,
+       m.fitness_goal, m.joined_on,
+       cm.membership_id, cm.plan_name, cm.end_date AS membership_end,
+       cm.days_left,
+       COALESCE(cm.status,
+                CASE WHEN EXISTS (SELECT 1 FROM memberships x WHERE x.member_id = m.member_id)
+                     THEN &#x27;expired&#x27; ELSE &#x27;none&#x27; END) AS membership_status,
+       (SELECT MAX(a.check_in) FROM attendance a WHERE a.member_id = m.member_id) AS last_visit
+FROM members m
+JOIN users u ON u.user_id = m.user_id
+LEFT JOIN v_current_memberships cm ON cm.member_id = m.member_id;</code></pre>
+<p><strong>Output</strong> of <code>SELECT member_code, full_name, age, plan_name, days_left, membership_status, last_visit FROM v_member_overview ORDER BY member_id LIMIT 6</code>:</p>
+<table><thead><tr><th>member_code</th><th>full_name</th><th>age</th><th>plan_name</th><th>days_left</th><th>membership_status</th><th>last_visit</th></tr></thead><tbody><tr><td>GM000007</td><td>Abhishek Kulkarni</td><td>49</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000008</td><td>Reyansh Gupta</td><td>54</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000009</td><td>Alex Sharma</td><td>42</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000010</td><td>Saanvi Rao</td><td>47</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000011</td><td>Kiara Mishra</td><td>18</td><td>Monthly Basic</td><td>0</td><td>active</td><td>2026-11-13 19:24:00</td></tr><tr><td>GM000012</td><td>Nandini Kulkarni</td><td>54</td><td>Monthly Plus</td><td>6</td><td>active</td><td>2026-11-13 06:23:00</td></tr></tbody></table>
+<h4>Q7. Churn risk (view <code>v_churn_risk</code>)</h4>
+<p><strong>Shows:</strong> view on top of a view, derived table with conditional SUM over two 30-day windows; queried like a table. Admin Reports: members whose visits in the last 30 days dropped below half of the 30 days before.</p>
+<pre class="code sql"><code>SELECT member_code, full_name, plan_name, visits_prev_30, visits_last_30, days_since_last_visit
+FROM v_churn_risk
+ORDER BY visits_last_30 / visits_prev_30
+LIMIT 8;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>):</p>
+<table><thead><tr><th>member_code</th><th>full_name</th><th>plan_name</th><th>visits_prev_30</th><th>visits_last_30</th><th>days_since_last_visit</th></tr></thead><tbody><tr><td>GM000040</td><td>Rahul Kumar</td><td>Monthly Plus</td><td>24</td><td>1</td><td>1</td></tr><tr><td>GM000041</td><td>Mohit Desai</td><td>Monthly Basic</td><td>22</td><td>2</td><td>18</td></tr><tr><td>GM000042</td><td>Varun Sharma</td><td>Monthly Plus</td><td>25</td><td>3</td><td>7</td></tr><tr><td>GM000046</td><td>Siddharth Sharma</td><td>Monthly Plus</td><td>22</td><td>3</td><td>1</td></tr><tr><td>GM000044</td><td>Tejas Kumar</td><td>Monthly Basic</td><td>21</td><td>3</td><td>8</td></tr><tr><td>GM000039</td><td>Varun Kumar</td><td>Quarterly</td><td>21</td><td>3</td><td>15</td></tr><tr><td>GM000038</td><td>Krishna Reddy</td><td>Quarterly</td><td>24</td><td>4</td><td>9</td></tr><tr><td>GM000035</td><td>Shruti Kulkarni</td><td>Monthly Plus</td><td>19</td><td>4</td><td>0</td></tr></tbody></table>
+<h4>Q8. Monthly revenue (view <code>v_monthly_revenue</code>)</h4>
+<p><strong>Shows:</strong> view with GROUP BY on DATE_FORMAT and conditional SUM(CASE …). Admin dashboard chart.</p>
+<pre class="code sql"><code>SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 6;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>):</p>
+<table><thead><tr><th>month</th><th>membership_revenue</th><th>pt_revenue</th><th>total_revenue</th><th>payment_count</th></tr></thead><tbody><tr><td>2026-11</td><td>107499.00</td><td>4800.00</td><td>112299.00</td><td>43</td></tr><tr><td>2026-10</td><td>186000.00</td><td>8100.00</td><td>194100.00</td><td>63</td></tr><tr><td>2026-09</td><td>139499.00</td><td>5300.00</td><td>144799.00</td><td>46</td></tr><tr><td>2026-08</td><td>161998.00</td><td>3000.00</td><td>164998.00</td><td>45</td></tr><tr><td>2026-07</td><td>165499.00</td><td>5600.00</td><td>171099.00</td><td>46</td></tr><tr><td>2026-06</td><td>151497.00</td><td>0.00</td><td>151497.00</td><td>36</td></tr></tbody></table>
+<h4>Q9. Stored function <code>fn_member_status</code> used inside a query</h4>
+<p><strong>Shows:</strong> user-defined function in SELECT and in GROUP BY. Front desk and member pages call the same function, so the "is this member allowed in?" rule exists only once.</p>
+<pre class="code sql"><code>SELECT fn_member_status(member_id) AS status, COUNT(*) AS members
+FROM members
+GROUP BY status
+ORDER BY members DESC;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>):</p>
+<table><thead><tr><th>status</th><th>members</th></tr></thead><tbody><tr><td>active</td><td>88</td></tr><tr><td>expired</td><td>15</td></tr><tr><td>none</td><td>4</td></tr><tr><td>frozen</td><td>3</td></tr></tbody></table>
+<h4>Q10. Stored procedure <code>sp_book_class</code> (transaction + row lock)</h4>
+<p><strong>Shows:</strong> START TRANSACTION / COMMIT, <code>SELECT … FOR UPDATE</code> row lock so two members cannot take the last seat at the same time, business rules raised with <code>SIGNAL SQLSTATE '45000'</code>, EXIT HANDLER that rolls back, OUT parameters. Called from the member Classes page with <code>CALL sp_book_class(?, ?, @id, @status)</code>.</p>
+<pre class="code sql"><code>CREATE PROCEDURE sp_book_class(IN p_member_id INT UNSIGNED, IN p_class_session_id INT UNSIGNED,
+                               OUT o_booking_id INT UNSIGNED, OUT o_status VARCHAR(12))
+BEGIN
+    DECLARE v_capacity SMALLINT UNSIGNED;
+    DECLARE v_starts DATETIME;
+    DECLARE v_session_status VARCHAR(12);
+    DECLARE v_taken INT;
+    DECLARE v_weekly_limit TINYINT UNSIGNED;
+    DECLARE v_membership_id INT UNSIGNED;
+    DECLARE v_existing_id INT UNSIGNED DEFAULT NULL;
+    DECLARE v_existing_status VARCHAR(12) DEFAULT NULL;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+        SELECT capacity, starts_at, status INTO v_capacity, v_starts, v_session_status
+        FROM class_sessions WHERE class_session_id = p_class_session_id
+        FOR UPDATE;
+
+        IF v_starts IS NULL THEN
+            SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;Class not found&#x27;;
+        END IF;
+        IF v_session_status &lt;&gt; &#x27;scheduled&#x27; OR v_starts &lt;= NOW() THEN
+            SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;This class is no longer open for booking&#x27;;
+        END IF;
+
+        SET v_membership_id = fn_active_membership_id(p_member_id, DATE(v_starts));
+        IF v_membership_id IS NULL THEN
+            SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;You need an active membership on the day of this class&#x27;;
+        END IF;
+
+        SELECT p.classes_per_week INTO v_weekly_limit
+        FROM memberships ms JOIN membership_plans p ON p.plan_id = ms.plan_id
+        WHERE ms.membership_id = v_membership_id;
+        IF v_weekly_limit IS NOT NULL
+           AND fn_classes_booked_in_week(p_member_id, DATE(v_starts)) &gt;= v_weekly_limit THEN
+            SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;Weekly class limit of your plan reached&#x27;;
+        END IF;
+
+        SELECT booking_id, status INTO v_existing_id, v_existing_status
+        FROM class_bookings
+        WHERE class_session_id = p_class_session_id AND member_id = p_member_id;
+        IF v_existing_status IN (&#x27;booked&#x27;,&#x27;waitlisted&#x27;) THEN
+            SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;You have already booked this class&#x27;;
+        END IF;
+
+        SELECT COUNT(*) INTO v_taken
+        FROM class_bookings
+        WHERE class_session_id = p_class_session_id AND status = &#x27;booked&#x27;;
+
+        SET o_status = IF(v_taken &lt; v_capacity, &#x27;booked&#x27;, &#x27;waitlisted&#x27;);
+
+        IF v_existing_id IS NOT NULL THEN
+            -- re-booking after an earlier cancellation: goes to the back of the queue
+            UPDATE class_bookings SET status = o_status, booked_at = CURRENT_TIMESTAMP(3)
+            WHERE booking_id = v_existing_id;
+            SET o_booking_id = v_existing_id;
+        ELSE
+            INSERT INTO class_bookings (class_session_id, member_id, status)
+            VALUES (p_class_session_id, p_member_id, o_status);
+            SET o_booking_id = LAST_INSERT_ID();
+        END IF;
+    COMMIT;
+END$$</code></pre>
+<h4>Q11. Trigger <code>trg_attendance_bi</code> (validation in the database)</h4>
+<p><strong>Shows:</strong> BEFORE INSERT trigger that refuses a check-in when the membership is frozen, missing/expired, or the member is already inside — even if a bug in the app tried to insert the row.</p>
+<pre class="code sql"><code>CREATE TRIGGER trg_attendance_bi BEFORE INSERT ON attendance FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM memberships
+               WHERE member_id = NEW.member_id AND status = &#x27;frozen&#x27;
+                 AND DATE(NEW.check_in) BETWEEN start_date AND end_date) THEN
+        SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;Membership is frozen. Unfreeze it to check in&#x27;;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM memberships
+                   WHERE member_id = NEW.member_id
+                     AND status IN (&#x27;active&#x27;,&#x27;expired&#x27;)
+                     AND DATE(NEW.check_in) BETWEEN start_date AND end_date) THEN
+        SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;Member has no active membership for today&#x27;;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM attendance
+               WHERE member_id = NEW.member_id AND check_out IS NULL) THEN
+        SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;Member is already checked in&#x27;;
+    END IF;
+END$$</code></pre>
+<h4>Q12. Trigger <code>trg_payments_au</code> + <code>trg_payments_bd</code> (audit + no deletes)</h4>
+<p><strong>Shows:</strong> AFTER UPDATE trigger writing a JSON before/after image into <code>audit_log</code>, and a BEFORE DELETE trigger that blocks deleting payments.</p>
+<pre class="code sql"><code>CREATE TRIGGER trg_payments_au AFTER UPDATE ON payments FOR EACH ROW
+BEGIN
+    INSERT INTO audit_log (table_name, record_id, action, old_value, new_value, changed_by)
+    VALUES (&#x27;payments&#x27;, NEW.payment_id, &#x27;UPDATE&#x27;,
+            JSON_OBJECT(&#x27;status&#x27;, OLD.status), JSON_OBJECT(&#x27;status&#x27;, NEW.status), USER());
+END$$
+
+CREATE TRIGGER trg_payments_bd BEFORE DELETE ON payments FOR EACH ROW
+BEGIN
+    SIGNAL SQLSTATE &#x27;45000&#x27; SET MESSAGE_TEXT = &#x27;Payments cannot be deleted; refund them instead&#x27;;
+END$$</code></pre>
+<h4>Q13. Scheduled event <code>ev_class_housekeeping</code></h4>
+<p><strong>Shows:</strong> MySQL Event Scheduler running a procedure every 15 minutes: finished classes → completed, unattended bookings → no_show, forgotten check-outs closed after 4 h, stale PT requests cancelled.</p>
+<pre class="code sql"><code>CREATE PROCEDURE sp_close_finished_classes()
+BEGIN
+    UPDATE class_bookings cb
+    JOIN class_sessions cs ON cs.class_session_id = cb.class_session_id
+    SET cb.status = CASE cb.status WHEN &#x27;booked&#x27; THEN &#x27;no_show&#x27; ELSE &#x27;cancelled&#x27; END
+    WHERE cs.status = &#x27;scheduled&#x27; AND cs.ends_at &lt; NOW()
+      AND cb.status IN (&#x27;booked&#x27;,&#x27;waitlisted&#x27;);
+
+    UPDATE class_sessions SET status = &#x27;completed&#x27;
+    WHERE status = &#x27;scheduled&#x27; AND ends_at &lt; NOW();
+
+    UPDATE attendance SET check_out = check_in + INTERVAL 4 HOUR
+    WHERE check_out IS NULL AND check_in &lt; NOW() - INTERVAL 4 HOUR;
+
+    UPDATE pt_sessions SET status = &#x27;cancelled&#x27;
+    WHERE status = &#x27;requested&#x27; AND starts_at &lt; NOW();
+END$$
+
+CREATE EVENT ev_class_housekeeping
+    ON SCHEDULE EVERY 15 MINUTE
+    DO CALL sp_close_finished_classes();</code></pre>
+<h4>Q14. Index use: EXPLAIN of a member's visit history</h4>
+<p><strong>Shows:</strong> EXPLAIN, composite index. The composite index on attendance(member_id, check_in) lets MySQL read one member's visits without scanning all attendance rows.</p>
+<pre class="code sql"><code>EXPLAIN SELECT check_in, check_out
+FROM attendance
+WHERE member_id = ? AND check_in &gt;= CURRENT_DATE - INTERVAL 30 DAY;</code></pre>
+<p><strong>Output</strong> (run as <code>gym_app</code>, parameters [58]):</p>
+<table><thead><tr><th>table</th><th>type</th><th>possible_keys</th><th>key</th><th>key_len</th><th>rows</th><th>Extra</th></tr></thead><tbody><tr><td>attendance</td><td>range</td><td>idx_attendance_member, idx_attendance_check_in</td><td>idx_attendance_member</td><td>9</td><td>26</td><td>Using index condition</td></tr></tbody></table>
+<h3>2. Integrity enforced by the database</h3>
+<p>Each statement below was sent <strong>as the application account <code>gym_app</code></strong> inside a transaction that was then rolled back. The database itself refuses the bad data — the error text is the real MySQL response.</p>
+<table><thead><tr><th>#</th><th>Rule</th><th>Statement</th><th>MySQL response</th></tr></thead><tbody><tr><td>1</td><td>CHECK constraint <code>chk_payments_target</code>: a payment must be for exactly one thing</td><td><code>INSERT INTO payments (member_id, membership_id, pt_session_id, amount, method, transaction_ref) VALUES (1, NULL, NULL, 500, 'cash', 'DEMO-1');</code></td><td>ERROR 3819 (HY000): Check constraint 'chk_payments_target' is violated.</td></tr><tr><td>2</td><td>CHECK constraint <code>chk_users_phone</code>: Indian mobile format</td><td><code>INSERT INTO users (email, password_hash, role, full_name, phone) VALUES ('x@demo.test', REPEAT('x', 60), 'member', 'Test User', '12345');</code></td><td>ERROR 3819 (HY000): Check constraint 'chk_users_phone' is violated.</td></tr><tr><td>3</td><td>UNIQUE <code>uq_users_email</code>: e-mail already registered</td><td><code>INSERT INTO users (email, password_hash, role, full_name) SELECT email, REPEAT('x', 60), 'member', 'Copy' FROM users LIMIT 1;</code></td><td>ERROR 1062 (23000): Duplicate entry 'aadhya.kumar@mail.test' for key 'users.uq_users_email'</td></tr><tr><td>4</td><td>Trigger <code>trg_members_bu</code>: member must be at least 14</td><td><code>UPDATE members SET date_of_birth = CURRENT_DATE - INTERVAL 10 YEAR WHERE member_id = 1;</code></td><td>ERROR 1644 (45000): Members must be between 14 and 100 years old</td></tr><tr><td>5</td><td>Trigger <code>trg_payments_bd</code>: payments can never be deleted</td><td><code>DELETE FROM payments WHERE payment_id = 1;</code></td><td>ERROR 1644 (45000): Payments cannot be deleted; refund them instead</td></tr><tr><td>6</td><td>Trigger <code>trg_payments_bu</code>: amount of a recorded payment cannot be changed</td><td><code>UPDATE payments SET amount = 1 WHERE payment_id = 1;</code></td><td>ERROR 1644 (45000): Payment details cannot be edited; refund it instead</td></tr><tr><td>7</td><td>Foreign key: booking for a class that does not exist</td><td><code>INSERT INTO class_bookings (class_session_id, member_id, status) VALUES (999999, 1, 'booked');</code></td><td>ERROR 1216 (23000): Cannot add or update a child row: a foreign key constraint fails</td></tr><tr><td>8</td><td>Stored procedure business rule: check-in with an unknown member code</td><td><code>CALL sp_check_in('GM999999', @a, @b);</code></td><td>ERROR 1644 (45000): No active member with that code</td></tr><tr><td>9</td><td>Least privilege: the app account cannot drop tables</td><td><code>DROP TABLE payments;</code></td><td>ERROR 1142 (42000): DROP command denied to user 'gym_app'@'localhost' for table 'payments'</td></tr></tbody></table>
+<h3>3. MongoDB queries (<code>gym_mongo</code>)</h3>
+<p><em>Member used for the per-member examples: memberId 58 (the member with the most workout logs).</em></p>
+<h4>Q15. Weekly training volume (aggregation pipeline)</h4>
+<p><strong>Shows:</strong> $match, $unwind, $group with $dateTrunc, $sum of $multiply, $addToSet, $avg, $project, $size, $sort. Member → Workouts page chart (<code>src/app/member/workouts/page.js</code>). Two <code>$unwind</code>s flatten exercises and sets; <code>$dateTrunc</code> groups by Monday-start week in Indian time.</p>
+<pre class="code js"><code>db.workout_logs.aggregate([
+  { $match: { memberId: 58, performedAt: { $gte: &lt;8 weeks ago&gt; } } },
+  { $unwind: { path: &#x27;$exercises&#x27;, preserveNullAndEmptyArrays: true } },
+  { $unwind: { path: &#x27;$exercises.sets&#x27;, preserveNullAndEmptyArrays: true } },
+  { $group: {
+      _id: { $dateTrunc: { date: &#x27;$performedAt&#x27;, unit: &#x27;week&#x27;, startOfWeek: &#x27;monday&#x27;, timezone: &#x27;Asia/Kolkata&#x27; } },
+      volume:   { $sum: { $multiply: [{ $ifNull: [&#x27;$exercises.sets.reps&#x27;, 0] }, { $ifNull: [&#x27;$exercises.sets.weightKg&#x27;, 0] }] } },
+      workouts: { $addToSet: &#x27;$_id&#x27; },
+      avgRpe:   { $avg: &#x27;$rpe&#x27; } } },
+  { $project: { volume: 1, workouts: { $size: &#x27;$workouts&#x27; }, avgRpe: { $round: [&#x27;$avgRpe&#x27;, 1] } } },
+  { $sort: { _id: 1 } }
+])</code></pre>
+<p><strong>Output:</strong></p>
+<table><thead><tr><th>volume</th><th>week</th><th>workouts</th><th>avgRpe</th></tr></thead><tbody><tr><td>15440</td><td>2026-09-20</td><td>5</td><td>6.8</td></tr><tr><td>20040</td><td>2026-09-27</td><td>5</td><td>7.2</td></tr><tr><td>20425</td><td>2026-10-04</td><td>5</td><td>7.6</td></tr><tr><td>13530</td><td>2026-10-11</td><td>4</td><td>7</td></tr><tr><td>17792.5</td><td>2026-10-18</td><td>4</td><td>7.7</td></tr><tr><td>23465</td><td>2026-10-25</td><td>6</td><td>7.5</td></tr><tr><td>19087.5</td><td>2026-11-01</td><td>4</td><td>5.7</td></tr><tr><td>22332.5</td><td>2026-11-08</td><td>5</td><td>6.2</td></tr></tbody></table>
+<h4>Q16. Personal records (heaviest set per exercise)</h4>
+<p><strong>Shows:</strong> $unwind, $match on nested field, $sort, $group with $first, $limit. Workouts page "Personal records" card. Sorting before <code>$group</code> lets <code>$first</code> pick the heaviest set and the date it happened.</p>
+<pre class="code js"><code>db.workout_logs.aggregate([
+  { $match: { memberId: 58 } },
+  { $unwind: &#x27;$exercises&#x27; },
+  { $unwind: &#x27;$exercises.sets&#x27; },
+  { $match: { &#x27;exercises.sets.weightKg&#x27;: { $gt: 0 } } },
+  { $sort: { &#x27;exercises.sets.weightKg&#x27;: -1, performedAt: 1 } },
+  { $group: { _id: &#x27;$exercises.name&#x27;, bestKg: { $first: &#x27;$exercises.sets.weightKg&#x27; },
+              reps: { $first: &#x27;$exercises.sets.reps&#x27; }, on: { $first: &#x27;$performedAt&#x27; } } },
+  { $sort: { bestKg: -1 } },
+  { $limit: 8 }
+])</code></pre>
+<p><strong>Output:</strong></p>
+<table><thead><tr><th>bestKg</th><th>reps</th><th>on</th><th>exercise</th></tr></thead><tbody><tr><td>75</td><td>10</td><td>2026-11-14 06:55</td><td>Leg Press</td></tr><tr><td>45</td><td>9</td><td>2026-11-08 05:50</td><td>Hip Thrust</td></tr><tr><td>45</td><td>6</td><td>2026-11-08 05:50</td><td>Barbell Back Squat</td></tr><tr><td>37.5</td><td>7</td><td>2026-11-03 04:03</td><td>Romanian Deadlift</td></tr><tr><td>37.5</td><td>6</td><td>2026-11-09 09:34</td><td>Barbell Bench Press</td></tr><tr><td>30</td><td>11</td><td>2026-11-02 14:29</td><td>Seated Cable Row</td></tr><tr><td>30</td><td>8</td><td>2026-11-02 14:29</td><td>Bent-Over Barbell Row</td></tr><tr><td>30</td><td>11</td><td>2026-10-31 13:52</td><td>Standing Calf Raise</td></tr></tbody></table>
+<h4>Q17. Weighted full-text search over exercises: "shoulder press"</h4>
+<p><strong>Shows:</strong> $text search, textScore projection and sort, $in with null for shared-or-mine visibility. Member → Exercises page. The text index weights name 10, primaryMuscle 6, tags 4, instructions 1; private exercises of other members are hidden.</p>
+<pre class="code js"><code>db.exercises.find(
+  { createdBy: { $in: [null, 58] }, $text: { $search: &#x27;shoulder press&#x27; } },
+  { projection: { name: 1, primaryMuscle: 1, level: 1, score: { $meta: &#x27;textScore&#x27; } },
+    sort: { score: { $meta: &#x27;textScore&#x27; } } }
+).limit(6)</code></pre>
+<p><strong>Output:</strong></p>
+<table><thead><tr><th>name</th><th>primaryMuscle</th><th>level</th><th>score</th></tr></thead><tbody><tr><td>Overhead Press</td><td>shoulders</td><td>intermediate</td><td>14.1</td></tr><tr><td>Leg Press</td><td>quadriceps</td><td>beginner</td><td>8.75</td></tr><tr><td>Barbell Bench Press</td><td>chest</td><td>intermediate</td><td>7.93</td></tr><tr><td>Incline Dumbbell Press</td><td>chest</td><td>beginner</td><td>7.33</td></tr><tr><td>Lateral Raise</td><td>shoulders</td><td>beginner</td><td>6.6</td></tr><tr><td>Face Pull</td><td>rear deltoids</td><td>beginner</td><td>3.63</td></tr></tbody></table>
+<h4>Q18. Most logged exercises across all members (last 30 days)</h4>
+<p><strong>Shows:</strong> $unwind, $group with $sum and $addToSet, $size, $sort, $limit. Exercises page "Popular right now".</p>
+<pre class="code js"><code>db.workout_logs.aggregate([
+  { $match: { performedAt: { $gte: &lt;30 days ago&gt; } } },
+  { $unwind: &#x27;$exercises&#x27; },
+  { $group: { _id: &#x27;$exercises.name&#x27;, times: { $sum: 1 }, members: { $addToSet: &#x27;$memberId&#x27; } } },
+  { $project: { times: 1, members: { $size: &#x27;$members&#x27; } } },
+  { $sort: { times: -1 } },
+  { $limit: 6 }
+])</code></pre>
+<p><strong>Output:</strong></p>
+<table><thead><tr><th>times</th><th>exercise</th><th>members</th></tr></thead><tbody><tr><td>168</td><td>Face Pull</td><td>28</td></tr><tr><td>167</td><td>Plank</td><td>31</td></tr><tr><td>139</td><td>Incline Dumbbell Press</td><td>29</td></tr><tr><td>138</td><td>Dead Bug</td><td>26</td></tr><tr><td>106</td><td>Walking Lunge</td><td>21</td></tr><tr><td>99</td><td>Romanian Deadlift</td><td>20</td></tr></tbody></table>
+<h4>Q19. Body-weight trend from the time-series collection</h4>
+<p><strong>Shows:</strong> time-series collection, $group by $dateTrunc, $avg, $min/$max. Workouts page weight chart: one average per week, read from the <code>body_metrics</code> time-series collection.</p>
+<pre class="code js"><code>db.body_metrics.aggregate([
+  { $match: { memberId: 58 } },
+  { $group: { _id: { $dateTrunc: { date: &#x27;$recordedAt&#x27;, unit: &#x27;week&#x27; } },
+              avgKg: { $avg: &#x27;$weightKg&#x27; }, minKg: { $min: &#x27;$weightKg&#x27; }, maxKg: { $max: &#x27;$weightKg&#x27; } } },
+  { $sort: { _id: -1 } },
+  { $limit: 6 }
+])</code></pre>
+<p><strong>Output:</strong></p>
+<table><thead><tr><th>minKg</th><th>maxKg</th><th>week</th><th>avgKg</th></tr></thead><tbody><tr><td>72.2</td><td>72.2</td><td>2026-11-08</td><td>72.2</td></tr><tr><td>71.9</td><td>71.9</td><td>2026-11-01</td><td>71.9</td></tr><tr><td>71.4</td><td>71.4</td><td>2026-10-25</td><td>71.4</td></tr><tr><td>71.1</td><td>71.1</td><td>2026-10-18</td><td>71.1</td></tr><tr><td>70.6</td><td>70.6</td><td>2026-10-11</td><td>70.6</td></tr><tr><td>70.4</td><td>70.4</td><td>2026-10-04</td><td>70.4</td></tr></tbody></table>
+<h4>Q20. Schema validation in MongoDB</h4>
+<p><strong>Shows:</strong> the <code>$jsonSchema</code> validator rejects a workout of 2 minutes with RPE 15 (allowed: 5–300 min, RPE 1–10).</p>
+<pre class="code js"><code>db.workout_logs.insertOne({ memberId: 58, performedAt: new Date(), durationMin: 2, rpe: 15, exercises: [] })</code></pre>
+<p><strong>Output:</strong> <code>Document failed validation (code 121)</code></p>
+<h3>4. Where each requirement is shown</h3>
+<table><thead><tr><th>Requirement (course PDF)</th><th>Query</th></tr></thead><tbody><tr><td>JOIN, GROUP BY, ORDER BY, aggregates</td><td>Q1, Q2, Q3</td></tr><tr><td>HAVING</td><td>Q2</td></tr><tr><td>Subqueries (FROM, NOT EXISTS, scalar)</td><td>Q2, Q3, Q4, Q6</td></tr><tr><td>Views</td><td>Q6, Q7, Q8</td></tr><tr><td>Functions / procedures</td><td>Q9, Q10</td></tr><tr><td>Transactions + locking</td><td>Q10</td></tr><tr><td>Triggers</td><td>Q11, Q12, section 2</td></tr><tr><td>Events</td><td>Q13</td></tr><tr><td>Indexing</td><td>Q5 (FULLTEXT), Q14 (EXPLAIN), Q17 (text index)</td></tr><tr><td>Full-text search</td><td>Q5, Q17</td></tr><tr><td>NoSQL aggregation</td><td>Q15, Q16, Q18, Q19</td></tr><tr><td>Validation at database level</td><td>section 2, Q20</td></tr></tbody></table></section><section id="screenshots"><h1>10. Screenshots</h1><figure class="screen"><img src="screenshots/01-landing.png" alt=""><figcaption>Figure 5: Landing page</figcaption></figure><figure class="screen"><img src="screenshots/02-login.png" alt=""><figcaption>Figure 6: Login</figcaption></figure><figure class="screen"><img src="screenshots/03-register.png" alt=""><figcaption>Figure 7: Member registration</figcaption></figure><figure class="screen"><img src="screenshots/10-admin-dashboard.png" alt=""><figcaption>Figure 8: Admin dashboard: KPIs, revenue by month (view v_monthly_revenue), peak hours, renewals due, churn risk</figcaption></figure><figure class="screen"><img src="screenshots/11-admin-front-desk.png" alt=""><figcaption>Figure 9: Front desk check-in / check-out (sp_check_in, trg_attendance_bi)</figcaption></figure><figure class="screen"><img src="screenshots/12-admin-members.png" alt=""><figcaption>Figure 10: Members list with search and status / plan filters</figcaption></figure><figure class="screen"><img src="screenshots/13-admin-member-detail.png" alt=""><figcaption>Figure 11: Member detail: membership history, payments, visits, selling a plan</figcaption></figure><figure class="screen"><img src="report-assets/14-admin-classes.png" alt=""><figcaption>Figure 12: Class timetable and class creation (top part of the page)</figcaption></figure><figure class="screen"><img src="report-assets/15-admin-payments.png" alt=""><figcaption>Figure 13: Payments with filters and refunds (top part of the page)</figcaption></figure><figure class="screen"><img src="screenshots/16-admin-plans.png" alt=""><figcaption>Figure 14: Membership plans</figcaption></figure><figure class="screen"><img src="report-assets/17-admin-reports.png" alt=""><figcaption>Figure 15: Reports: GROUP BY, HAVING, RANK(), NOT EXISTS, churn view, audit log (top part of the page)</figcaption></figure><figure class="screen"><img src="screenshots/18-admin-gym-setup.png" alt=""><figcaption>Figure 16: Gym setup: rooms, class types and trainers</figcaption></figure><figure class="screen"><img src="screenshots/20-trainer-home.png" alt=""><figcaption>Figure 17: Trainer schedule, PT requests and class attendance</figcaption></figure><figure class="screen"><img src="report-assets/21-trainer-members.png" alt=""><figcaption>Figure 18: Trainer: members, their activity (MongoDB aggregation) and the plan builder (top part of the page)</figcaption></figure><figure class="screen"><img src="screenshots/30-member-home.png" alt=""><figcaption>Figure 19: Member home: membership, visits, upcoming bookings, notifications</figcaption></figure><figure class="screen"><img src="report-assets/31-member-classes.png" alt=""><figcaption>Figure 20: Booking classes and joining waitlists (top part of the page)</figcaption></figure><figure class="screen"><img src="screenshots/32-member-training-search.png" alt=""><figcaption>Figure 21: Full-text trainer search for "back pain" (MATCH … AGAINST) and PT request</figcaption></figure><figure class="screen"><img src="screenshots/33-member-workouts.png" alt=""><figcaption>Figure 22: Workouts & progress: weekly volume and personal records (MongoDB aggregation), body-weight time series, workout logger</figcaption></figure><figure class="screen"><img src="screenshots/34-member-plan-builder.png" alt=""><figcaption>Figure 23: Building an own workout plan</figcaption></figure><figure class="screen"><img src="screenshots/35-member-exercises-search.png" alt=""><figcaption>Figure 24: Exercise library with weighted $text search for "shoulder press"</figcaption></figure><figure class="screen"><img src="screenshots/36-member-membership.png" alt=""><figcaption>Figure 25: Membership: buy, renew, freeze / unfreeze</figcaption></figure><figure class="screen"><img src="screenshots/37-member-profile.png" alt=""><figcaption>Figure 26: Profile and password change</figcaption></figure><figure class="screen"><img src="screenshots/40-access-denied-redirect.png" alt=""><figcaption>Figure 27: A trainer opening /admin is redirected to the trainer area</figcaption></figure></section><section id="testing"><h1>11. Testing</h1><h3>1. Automated database tests</h3>
+<p><strong>Result: 55 of 55 passed</strong> (run 2026-11-14 18:10 UTC with <code>node docs/tools/run-tests.mjs</code>).</p>
+<p>How the suite works: it builds a separate copy of both databases (<code>gym_test</code>, <code>gym_test_mongo</code>) from the same <code>db/</code> scripts and demo seed, runs every case <strong>as the application account <code>gym_app</code></strong> (the same least-privilege login the web app uses), records the real database response, and drops the copies at the end — the live data is never touched. A case passes only if the database gives exactly the expected result or the expected error.</p>
+<h4>1.1 Registration and accounts (6/6)</h4>
+<table><thead><tr><th>ID</th><th>Test case</th><th>Input / action</th><th>Expected</th><th>Actual (database response)</th><th>Result</th></tr></thead><tbody><tr><td>T01</td><td>Register a new member (procedure)</td><td><code>CALL sp_register_member('Test.A@Example.test ', hash, 'Test A', phone, 25 y, …)</code></td><td>member_id returned, code GM + 6 digits, e-mail stored lower-case and trimmed</td><td>member_id 111, code GM000117, e-mail "test.a@example.test"</td><td>✅ Pass</td></tr><tr><td>T02</td><td>Reject member younger than 14</td><td><code>sp_register_member with date of birth 10 years ago</code></td><td>Error from trg_members_bi; user row rolled back</td><td>ERROR 1644 Members must be at least 14 years old; users before/after: 117/117</td><td>✅ Pass</td></tr><tr><td>T03</td><td>Reject duplicate e-mail</td><td><code>Register again with TEST.A@example.test</code></td><td>Duplicate entry error (UNIQUE uq_users_email)</td><td>ERROR 1062 Duplicate entry 'test.a@example.test' for key 'users.uq_users_email'</td><td>✅ Pass</td></tr><tr><td>T04</td><td>Reject invalid phone number</td><td><code>INSERT INTO users … phone '12345'</code></td><td>CHECK constraint chk_users_phone violated</td><td>ERROR 3819 Check constraint 'chk_users_phone' is violated.</td><td>✅ Pass</td></tr><tr><td>T05</td><td>Reject invalid e-mail</td><td><code>INSERT INTO users … email 'not-an-email'</code></td><td>CHECK constraint chk_users_email violated</td><td>ERROR 3819 Check constraint 'chk_users_email' is violated.</td><td>✅ Pass</td></tr><tr><td>T06</td><td>Passwords are stored only as bcrypt hashes</td><td><code>SELECT password_hash FROM users</code></td><td>Every hash is 60 chars and starts with $2</td><td>117 of 117 rows are bcrypt hashes</td><td>✅ Pass</td></tr></tbody></table>
+<h4>1.2 Memberships and payments (14/14)</h4>
+<table><thead><tr><th>ID</th><th>Test case</th><th>Input / action</th><th>Expected</th><th>Actual (database response)</th><th>Result</th></tr></thead><tbody><tr><td>T07</td><td>Buy a membership</td><td><code>CALL sp_purchase_membership(M1, 'Monthly Plus', 'upi', admin)</code></td><td>Membership starts today, end date filled by trigger from plan duration, completed payment for the plan price</td><td>2026-11-14 → 2026-12-13 (30 days, active); payment ₹2500.00 completed</td><td>✅ Pass</td></tr><tr><td>T08</td><td>Renewal is queued after the current plan</td><td><code>Buy the same plan again for M1</code></td><td>New membership starts the day after the current one ends (no overlap)</td><td>current ends 2026-12-13, renewal starts 2026-12-14</td><td>✅ Pass</td></tr><tr><td>T09</td><td>Overlapping membership is blocked</td><td><code>INSERT a second membership for M1 covering today</code></td><td>Error from trg_memberships_bi</td><td>ERROR 1644 Member already has a membership covering these dates</td><td>✅ Pass</td></tr><tr><td>T10</td><td>Inactive plan cannot be bought</td><td><code>sp_purchase_membership with a switched-off plan</code></td><td>Error 'This plan is no longer offered'</td><td>ERROR 1644 This plan is no longer offered</td><td>✅ Pass</td></tr><tr><td>T11</td><td>Freeze a membership</td><td><code>Member M4 buys 'Monthly Plus', then sp_freeze_membership</code></td><td>Status frozen, frozen_from = today</td><td>status frozen, frozen_from 2026-11-14</td><td>✅ Pass</td></tr><tr><td>T12</td><td>Frozen member cannot check in</td><td><code>CALL sp_check_in('&lt;M4 code&gt;')</code></td><td>Error from trg_attendance_bi: 'Membership is frozen…'</td><td>ERROR 1644 Membership is frozen. Unfreeze it to check in</td><td>✅ Pass</td></tr><tr><td>T13</td><td>Unfreeze adds the frozen days to the end date</td><td><code>Set frozen_from 5 days back, then sp_unfreeze_membership</code></td><td>days_added = 5, end date +5, freeze_days_used = 5, status active</td><td>days_added 5; end 2026-12-13 → 2026-12-18; used 5; active</td><td>✅ Pass</td></tr><tr><td>T14</td><td>Frozen flag and frozen_from must match</td><td><code>UPDATE memberships SET status = 'frozen' (frozen_from stays NULL)</code></td><td>CHECK constraint chk_memberships_frozen violated</td><td>ERROR 3819 Check constraint 'chk_memberships_frozen' is violated.</td><td>✅ Pass</td></tr><tr><td>T15</td><td>Payment must be for exactly one thing</td><td><code>INSERT payment with membership_id and pt_session_id both NULL</code></td><td>CHECK constraint chk_payments_target violated</td><td>ERROR 3819 Check constraint 'chk_payments_target' is violated.</td><td>✅ Pass</td></tr><tr><td>T16</td><td>Payment amount must be positive</td><td><code>INSERT payment with amount 0</code></td><td>CHECK constraint chk_payments_amount violated</td><td>ERROR 3819 Check constraint 'chk_payments_amount' is violated.</td><td>✅ Pass</td></tr><tr><td>T17</td><td>Payments cannot be deleted</td><td><code>DELETE FROM payments WHERE payment_id = &lt;M1 payment&gt;</code></td><td>Error from trg_payments_bd 'Payments cannot be deleted; refund them instead'</td><td>ERROR 1644 Payments cannot be deleted; refund them instead</td><td>✅ Pass</td></tr><tr><td>T18</td><td>Payment details cannot be edited</td><td><code>UPDATE payments SET amount = 1</code></td><td>Error from trg_payments_bu</td><td>ERROR 1644 Payment details cannot be edited; refund it instead</td><td>✅ Pass</td></tr><tr><td>T19</td><td>Refund is recorded in the audit log</td><td><code>UPDATE payments SET status = 'refunded'</code></td><td>Status refunded; trg_payments_au writes old/new JSON to audit_log</td><td>audit_log: {"status":"completed"} → {"status":"refunded"} by gym_app@localhost</td><td>✅ Pass</td></tr><tr><td>T20</td><td>A refund cannot be undone</td><td><code>UPDATE payments SET status = 'completed' on the refunded payment</code></td><td>Error from trg_payments_bu</td><td>ERROR 1644 A refunded payment cannot be restored</td><td>✅ Pass</td></tr></tbody></table>
+<h4>1.3 Front desk (attendance) (6/6)</h4>
+<table><thead><tr><th>ID</th><th>Test case</th><th>Input / action</th><th>Expected</th><th>Actual (database response)</th><th>Result</th></tr></thead><tbody><tr><td>T21</td><td>Check in an active member</td><td><code>CALL sp_check_in(&lt;M1 code&gt;)</code></td><td>attendance row created, member name returned</td><td>attendance_id 7649, name "Test A" (code typed lower-case with a space)</td><td>✅ Pass</td></tr><tr><td>T22</td><td>Double check-in is refused</td><td><code>CALL sp_check_in(&lt;M1 code&gt;) again</code></td><td>Error 'Member is already checked in'</td><td>ERROR 1644 Member is already checked in</td><td>✅ Pass</td></tr><tr><td>T23</td><td>Check out</td><td><code>CALL sp_check_out(&lt;M1 code&gt;)</code></td><td>Visit closed, minutes returned, check_out &gt; check_in</td><td>0 min, 2026-11-14 23:40:54 → 2026-11-14 23:41:54</td><td>✅ Pass</td></tr><tr><td>T24</td><td>Member without a plan cannot check in</td><td><code>Register M5 (no purchase), sp_check_in</code></td><td>Error 'Member has no active membership for today'</td><td>ERROR 1644 Member has no active membership for today</td><td>✅ Pass</td></tr><tr><td>T25</td><td>Unknown member code</td><td><code>CALL sp_check_in('GM999999')</code></td><td>Error 'No active member with that code'</td><td>ERROR 1644 No active member with that code</td><td>✅ Pass</td></tr><tr><td>T26</td><td>Check-out before check-in is impossible</td><td><code>UPDATE attendance SET check_out = check_in - 1 hour</code></td><td>CHECK constraint chk_attendance_times violated</td><td>ERROR 3819 Check constraint 'chk_attendance_times' is violated.</td><td>✅ Pass</td></tr></tbody></table>
+<h4>1.4 Group classes and waitlist (11/11)</h4>
+<table><thead><tr><th>ID</th><th>Test case</th><th>Input / action</th><th>Expected</th><th>Actual (database response)</th><th>Result</th></tr></thead><tbody><tr><td>T27</td><td>Create a class; end time filled by trigger</td><td><code>INSERT class_sessions (type 'Mobility &amp; Stretch', ends_at NULL, capacity 1) on 2026-11-20 01:00</code></td><td>ends_at = starts_at + 30 min</td><td>2026-11-20 01:00:00 → 2026-11-20 01:30:00 (30 min)</td><td>✅ Pass</td></tr><tr><td>T28</td><td>Capacity cannot exceed the room</td><td><code>INSERT class with capacity 13 in 'Functional Zone' (capacity 12)</code></td><td>Error from trg_class_sessions_bi</td><td>ERROR 1644 Class capacity is larger than the room capacity</td><td>✅ Pass</td></tr><tr><td>T29</td><td>Room double-booking is blocked</td><td><code>INSERT another class in 'Functional Zone' at the same time with another trainer</code></td><td>Error from trg_class_sessions_bi (room clash)</td><td>ERROR 1644 Room is already booked for another class at that time</td><td>✅ Pass</td></tr><tr><td>T30</td><td>Trainer double-booking is blocked</td><td><code>INSERT a class for the same trainer at the same time in another room</code></td><td>Error from sp_assert_trainer_free (called by the trigger)</td><td>ERROR 1644 Trainer is already teaching a class at that time</td><td>✅ Pass</td></tr><tr><td>T31</td><td>First booking takes the seat</td><td><code>M1 books class C1 (capacity 1)</code></td><td>status 'booked'</td><td>booking 3935: booked</td><td>✅ Pass</td></tr><tr><td>T32</td><td>Full class puts the next member on the waitlist</td><td><code>M2 buys 'Monthly Plus' and books C1</code></td><td>status 'waitlisted'</td><td>booking 3936: waitlisted</td><td>✅ Pass</td></tr><tr><td>T33</td><td>Same class cannot be booked twice</td><td><code>M1 books C1 again</code></td><td>Error 'You have already booked this class'</td><td>ERROR 1644 You have already booked this class</td><td>✅ Pass</td></tr><tr><td>T34</td><td>Cancelling promotes the first waitlisted member</td><td><code>M1 cancels with sp_cancel_class_booking</code></td><td>M1 cancelled, M2 promoted to booked</td><td>promoted member 114 (M2 = 114); statuses cancelled, booked</td><td>✅ Pass</td></tr><tr><td>T35</td><td>No booking without a membership</td><td><code>M5 (no plan) books a class</code></td><td>Error 'You need an active membership…'</td><td>ERROR 1644 You need an active membership on the day of this class</td><td>✅ Pass</td></tr><tr><td>T36</td><td>Weekly class limit of the plan</td><td><code>New member M3 on 'Monthly Basic' (3 classes/week) books 4 classes in one week</code></td><td>First 3 booked, next one refused</td><td>booked, booked, booked; then ERROR 1644 Weekly class limit of your plan reached</td><td>✅ Pass</td></tr><tr><td>T37</td><td>Cancelling a class cancels its bookings</td><td><code>UPDATE class_sessions SET status = 'cancelled' for C1</code></td><td>trg_class_sessions_au sets every booking of C1 to cancelled</td><td>bookings still open: 0</td><td>✅ Pass</td></tr></tbody></table>
+<h4>1.5 Personal training (5/5)</h4>
+<table><thead><tr><th>ID</th><th>Test case</th><th>Input / action</th><th>Expected</th><th>Actual (database response)</th><th>Result</th></tr></thead><tbody><tr><td>T38</td><td>Request a PT session</td><td><code>sp_book_pt_session(M1, trainer 1, 2026-11-16 10:00:00, 60 min)</code></td><td>status 'requested', price 0 if the plan includes PT else the trainer's hourly rate</td><td>pt_session 169: requested, price ₹0.00 (plan includes 1)</td><td>✅ Pass</td></tr><tr><td>T39</td><td>Trainer cannot have two sessions at once</td><td><code>M2 requests the same trainer at the same time</code></td><td>Error from trg_pt_sessions_bi</td><td>ERROR 1644 Trainer already has a personal training session at that time</td><td>✅ Pass</td></tr><tr><td>T40</td><td>PT must be booked 2 hours ahead</td><td><code>Start time NOW() + 1 hour</code></td><td>Error 'Book personal training at least 2 hours ahead'</td><td>ERROR 1644 Book personal training at least 2 hours ahead</td><td>✅ Pass</td></tr><tr><td>T41</td><td>PT only during opening hours</td><td><code>Start 21:30 for 60 minutes</code></td><td>Error 'The gym is open from 06:00 to 22:00'</td><td>ERROR 1644 The gym is open from 06:00 to 22:00</td><td>✅ Pass</td></tr><tr><td>T42</td><td>Finished PT session cannot be reopened</td><td><code>Set status completed, then back to 'requested'</code></td><td>Error from trg_pt_sessions_bu; status change written to audit_log</td><td>ERROR 1644 A finished or cancelled session cannot change status; audit rows for this session: 2</td><td>✅ Pass</td></tr></tbody></table>
+<h4>1.6 Scheduled events (procedures they call) (2/2)</h4>
+<table><thead><tr><th>ID</th><th>Test case</th><th>Input / action</th><th>Expected</th><th>Actual (database response)</th><th>Result</th></tr></thead><tbody><tr><td>T43</td><td>Expired memberships are closed</td><td><code>Move M5's new membership into the past, CALL sp_expire_memberships()</code></td><td>status becomes 'expired'</td><td>end 2026-10-14 → expired</td><td>✅ Pass</td></tr><tr><td>T44</td><td>Finished classes are completed and absentees marked no-show</td><td><code>Move a booked class into the past, CALL sp_close_finished_classes()</code></td><td>class 'completed', booking 'no_show'</td><td>class completed, booking no_show</td><td>✅ Pass</td></tr></tbody></table>
+<h4>1.7 Security (least privilege) (3/3)</h4>
+<table><thead><tr><th>ID</th><th>Test case</th><th>Input / action</th><th>Expected</th><th>Actual (database response)</th><th>Result</th></tr></thead><tbody><tr><td>T45</td><td>App account cannot DROP a table</td><td><code>DROP TABLE payments</code></td><td>Access denied for gym_app</td><td>ERROR 1142 DROP command denied to user 'gym_app'@'localhost' for table 'payments'</td><td>✅ Pass</td></tr><tr><td>T46</td><td>App account cannot ALTER a table</td><td><code>ALTER TABLE users ADD COLUMN x INT</code></td><td>Access denied for gym_app</td><td>ERROR 1142 ALTER command denied to user 'gym_app'@'localhost' for table 'users'</td><td>✅ Pass</td></tr><tr><td>T47</td><td>App account cannot create triggers</td><td><code>CREATE TRIGGER t BEFORE INSERT ON users FOR EACH ROW SET NEW.role = 'admin'</code></td><td>Access denied for gym_app</td><td>ERROR 1419 You do not have the SUPER privilege and binary logging is enabled (you *might* want to use the less safe log_bin_trust_function_creators variable)</td><td>✅ Pass</td></tr></tbody></table>
+<h4>1.8 MongoDB validation and indexes (8/8)</h4>
+<table><thead><tr><th>ID</th><th>Test case</th><th>Input / action</th><th>Expected</th><th>Actual (database response)</th><th>Result</th></tr></thead><tbody><tr><td>T48</td><td>Valid workout log is accepted</td><td><code>insertOne({ memberId, performedAt, durationMin: 45, rpe: 7, exercises: [ … 3 sets … ] })</code></td><td>Document inserted</td><td>inserted 6af8a42e4c7e6075a6349b7f</td><td>✅ Pass</td></tr><tr><td>T49</td><td>Workout of 2 minutes with RPE 15 is rejected</td><td><code>insertOne({"durationMin":2,"rpe":15,"exercises":[]})</code></td><td>Document failed validation (durationMin 5–300, rpe 1–10)</td><td>code 121: Document failed validation</td><td>✅ Pass</td></tr><tr><td>T50</td><td>Unknown field inside a set is rejected</td><td><code>insertOne({"durationMin":30,"rpe":5,"exercises":[{"name":"x","sets":[{"reps":5,"hack":true}]}]})</code></td><td>Document failed validation (additionalProperties false)</td><td>code 121: Document failed validation</td><td>✅ Pass</td></tr><tr><td>T51</td><td>Log without memberId is rejected</td><td><code>insertOne({"durationMin":30,"rpe":5,"exercises":[]})</code></td><td>Document failed validation (memberId required)</td><td>code 121: Document failed validation</td><td>✅ Pass</td></tr><tr><td>T52</td><td>Workout plan needs at least one day</td><td><code>workout_plans.insertOne({ …, days: [] })</code></td><td>Document failed validation (minItems 1)</td><td>code 121: Document failed validation</td><td>✅ Pass</td></tr><tr><td>T53</td><td>Exercise slug is unique</td><td><code>insert a second exercise with an existing slug</code></td><td>Duplicate key error E11000 (index uq_slug)</td><td>code 11000: E11000 duplicate key error collection: gym_test_mongo.exercises index: uq_slug</td><td>✅ Pass</td></tr><tr><td>T54</td><td>Weighted text search ranks name matches first</td><td><code>find({ $text: { $search: 'squat' } }) sorted by textScore</code></td><td>Exercises with "squat" in the name come first</td><td>Goblet Squat (8.10), Barbell Back Squat (6.67), Box Jump (0.63)</td><td>✅ Pass</td></tr><tr><td>T55</td><td>Notifications expire after 60 days</td><td><code>notifications.indexes()</code></td><td>TTL index on createdAt with expireAfterSeconds 5184000</td><td>ttl_60_days: { createdAt: 1 }, expireAfterSeconds 5184000</td><td>✅ Pass</td></tr></tbody></table>
+<h3>2. Manual end-to-end tests in the browser</h3>
+<p>Run by hand through the Next.js UI on the dates shown (2026-10-31 first build, 2026-11-02 full screen-by-screen run, 2026-11-11 new features) (results checked afterwards in MySQL Workbench and MongoDB Compass). They cover the same rules as section 1 but through the real forms, plus UI-only behaviour (redirects, messages, notifications).</p>
+<table><thead><tr><th>ID</th><th>Role / area</th><th>Steps</th><th>Expected and observed</th><th>Date</th><th>Result</th></tr></thead><tbody><tr><td>U01</td><td>Public</td><td>Register with phone "12345"</td><td>Browser blocks the form (pattern) before sending</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U02</td><td>Public</td><td>Register with date of birth making the member 12</td><td>Form shows "Members must be at least 14 years old" (trigger); typed values stay in the form</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U03</td><td>Public</td><td>Register with valid data</td><td>Account GM000120 created, logged in, redirected to member home</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U04</td><td>Public</td><td>Log in with a wrong password</td><td>Error message shown, user stays logged out</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U05</td><td>Security</td><td>Read document.cookie in the browser console after login</td><td>gym_session not visible (httpOnly)</td><td>2026-10-31</td><td>✅ Pass</td></tr><tr><td>U06</td><td>Security</td><td>Trainer opens /admin</td><td>Redirected to /trainer (proxy + requireRole)</td><td>2026-10-31</td><td>✅ Pass</td></tr><tr><td>U07</td><td>Admin</td><td>Front desk: check in an expired member / an active member / the same member again</td><td>Refused / checked in / "already checked in"</td><td>2026-10-31</td><td>✅ Pass</td></tr><tr><td>U08</td><td>Admin</td><td>Create class in a room already in use</td><td>Room-clash error from trigger</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U09</td><td>Admin</td><td>Create class with capacity above the room capacity</td><td>Capacity error from trigger</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U10</td><td>Admin</td><td>Create a valid class without end time</td><td>Class created, end time filled from class type</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U11</td><td>Admin</td><td>Cancel a class (confirm dialog)</td><td>Bookings cancelled and members notified in their inbox</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U12</td><td>Admin</td><td>Create plan with freeze days &gt; duration</td><td>CHECK constraint error shown</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U13</td><td>Admin</td><td>Switch a plan off</td><td>Plan disappears from the sell list; old memberships keep it</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U14</td><td>Admin</td><td>Sell a renewal to a member with an active plan</td><td>New membership queued after the current end date</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U15</td><td>Admin</td><td>Refund a payment (confirm dialog)</td><td>Payment refunded, membership cancelled, member notified, audit_log row</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U16</td><td>Admin</td><td>Reports page</td><td>Revenue, class popularity (HAVING), ranking (RANK), churn, never-booked, audit log render</td><td>2026-10-31</td><td>✅ Pass</td></tr><tr><td>U17</td><td>Admin</td><td>Gym setup: add trainer / room / class type</td><td>Rows created (trainer via sp_add_trainer: users + trainers in one transaction)</td><td>2026-11-11</td><td>✅ Pass</td></tr><tr><td>U18</td><td>Trainer</td><td>Confirm a requested PT session</td><td>Status confirmed</td><td>2026-10-31</td><td>✅ Pass</td></tr><tr><td>U19</td><td>Trainer</td><td>Mark a paid PT session done (choose payment method)</td><td>Session completed and payment inserted in the same transaction, recorded_by = trainer</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U20</td><td>Trainer</td><td>Mark attendance Present for a class from yesterday</td><td>Allowed (2-day window); older classes locked</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U21</td><td>Trainer</td><td>Build a plan with no exercises / a valid plan</td><td>Error / plan saved in MongoDB and member notified</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U22</td><td>Trainer</td><td>Member cancels a PT session</td><td>Trainer receives a notification</td><td>2026-11-11</td><td>✅ Pass</td></tr><tr><td>U23</td><td>Member</td><td>Buy a plan, freeze, unfreeze</td><td>Status changes and end date shown correctly</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U24</td><td>Member</td><td>Book a full class, then another member cancels</td><td>Waitlisted, then promoted with a notification</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U25</td><td>Member</td><td>Waitlisted member already at weekly limit</td><td>Skipped during promotion; next eligible member promoted</td><td>2026-11-11</td><td>✅ Pass</td></tr><tr><td>U26</td><td>Member</td><td>Search trainers for "back pain"</td><td>Kavya Iyer (mobility, lower back) listed first (FULLTEXT)</td><td>2026-10-31</td><td>✅ Pass</td></tr><tr><td>U27</td><td>Member</td><td>Log a workout incl. "20 min" cardio item</td><td>Saved; cardio typed in minutes, stored as seconds; charts update</td><td>2026-11-11</td><td>✅ Pass</td></tr><tr><td>U28</td><td>Member</td><td>Record body weight outside / inside 25–300 kg</td><td>Rejected / saved and chart updated</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U29</td><td>Member</td><td>Add a private exercise, build and activate own plan, delete it</td><td>Exercise visible only to this member; plan active then deleted</td><td>2026-11-02</td><td>✅ Pass</td></tr><tr><td>U30</td><td>Member</td><td>Edit profile; change password</td><td>Profile saved; password changed and password_changed_at set by trigger</td><td>2026-11-11</td><td>✅ Pass</td></tr></tbody></table>
+<h3>3. Build checks</h3>
+<table><thead><tr><th>Check</th><th>Command</th><th>Result</th></tr></thead><tbody><tr><td>Lint (ESLint, Next.js rules)</td><td><code>npm run lint</code></td><td>No errors (2026-11-13)</td></tr><tr><td>Production build</td><td><code>npm run build</code></td><td>Compiles, all routes built (2026-11-11)</td></tr><tr><td>Database test suite</td><td><code>node docs/tools/run-tests.mjs</code></td><td>55/55 passed (2026-11-14)</td></tr></tbody></table></section><section id="contributions"><h1>12. Individual Contributions</h1>
+<p>Commit history on GitHub: 4 commits by <code>SUKRUTH-ES</code>; 6 commits by <code>gags6030-sudo</code>, merged into
+<code>main</code> through pull request #1.</p>
+<table><thead><tr><th>Member</th><th>Database work</th><th>Application work</th></tr></thead><tbody>
+<tr><td><strong>SUKRUTH ES</strong><br>PES1UG24CS160<br><code>SUKRUTH-ES</code></td>
+<td>ER model and relational schema; tables, constraints and indexes; views; core procedures and functions (registration,
+purchase, freeze, booking with waitlist, PT booking, check-in); validation, clash and audit triggers; scheduled events;
+MongoDB collections, validators and indexes; least-privilege account; seed data</td>
+<td>Project setup; authentication, sessions and role protection; data-access layer; admin dashboard, front desk, members,
+classes, payments, plans and reports; trainer pages; member booking, training, workouts, exercises and membership pages;
+charts; end-to-end testing and documentation</td></tr>
+<tr><td><strong>Gagan Eswar</strong><br>PES1UG24CS165<br><code>gags6030-sudo</code></td>
+<td><code>sp_add_trainer</code> (user + trainer in one transaction); <code>password_changed_at</code> column and trigger;
+<code>trg_pt_sessions_au</code> audit trigger; weekly-limit check in <code>sp_cancel_class_booking</code>'s waitlist
+promotion; validator change for cardio minutes</td>
+<td>Admin Gym setup page; member profile and change-password page; trainer notification when a member cancels PT;
+waitlist message on the classes page; workout logger in minutes for cardio</td></tr>
+</tbody></table></section><section id="conclusion"><h1>13. Conclusion and Future Enhancements</h1>
+<p>IronPulse meets the project brief with a MySQL + MongoDB design in which each database stores the data it suits best.
+The relational side keeps money, capacity and schedules consistent through 22 CHECK constraints, 18 triggers,
+13 stored procedures and transactional row locks; the document side stores nested training data with schema
+validation and computes progress with aggregation pipelines. The Next.js interface gives three roles their own
+workflows, and every rule shown in the interface is enforced again in the database. The automated suite
+(55 of 55 cases passed) and the manual browser tests show that invalid operations are refused
+with clear messages and valid ones update every related row together.</p>
+<p>What we learned: moving rules into the database (triggers and procedures instead of only form checks) made the app code
+smaller and removed a whole class of bugs; and picking the database by the shape of the data made both sides simpler than
+forcing everything into one model.</p>
+<h3>Future enhancements</h3>
+<ul>
+<li><strong>Semantic search:</strong> store exercise and trainer-bio embeddings (e.g. in MongoDB Atlas Vector Search or
+pgvector) so "something for my knees" finds low-impact exercises without matching words.</li>
+<li>Online payments through a payment gateway with webhooks, replacing the simulated member self-purchase.</li>
+<li>E-mail / SMS reminders for renewals and classes, and password reset by e-mail.</li>
+<li>QR-code check-in at the door and a mobile app.</li>
+<li>Multi-branch support (a <code>branches</code> table, branch-scoped admins and reports).</li>
+<li>More flexible trainer plan builder (more than 3 days, custom sets and reps per member).</li>
+</ul></section><section id="appendix"><h1>Appendix: How to Run</h1>
+<ol>
+<li>Install Node.js 20.11+, MySQL 8 and MongoDB 8; clone <a href="https://github.com/SUKRUTH-ES/ironpulse-gym-management">https://github.com/SUKRUTH-ES/ironpulse-gym-management</a>.</li>
+<li><code>npm install</code></li>
+<li>Copy <code>.env.example</code> to <code>.env.local</code> and fill in the MySQL root password (used only by the setup
+script), a random <code>MYSQL_PASSWORD</code> for the app account and a random <code>SESSION_SECRET</code>.</li>
+<li><code>npm run db:setup</code> — builds both databases and loads demo data (drops existing data).</li>
+<li><code>npm run dev</code> and open <code>http://localhost:3000</code>. Demo logins are listed in the README.</li>
+<li>Documentation tools (in <code>docs/tools/</code>): <code>node docs/tools/dump-schema.mjs</code>, <code>python docs/tools/make_schema.py</code>,
+<code>python docs/tools/make_dictionary.py</code>, <code>node docs/tools/run-queries.mjs</code>,
+<code>node docs/tools/screenshots.mjs</code>, <code>node docs/tools/run-tests.mjs</code> + <code>python docs/tools/make_testdoc.py</code>,
+then <code>python docs/tools/build_report.py</code> (course report) and <code>python docs/tools/build_full_report.py</code> (this document).</li>
+</ol></section></body></html>

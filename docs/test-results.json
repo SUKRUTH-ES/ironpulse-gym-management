@@ -1,0 +1,502 @@
+{
+  "ranAt": "2026-11-14T18:10:54.927Z",
+  "passed": 55,
+  "total": 55,
+  "results": [
+    {
+      "id": "T01",
+      "area": "Registration and accounts",
+      "title": "Register a new member (procedure)",
+      "input": "CALL sp_register_member('Test.A@Example.test ', hash, 'Test A', phone, 25 y, …)",
+      "expected": "member_id returned, code GM + 6 digits, e-mail stored lower-case and trimmed",
+      "actual": "member_id 111, code GM000117, e-mail \"test.a@example.test\"",
+      "pass": true
+    },
+    {
+      "id": "T02",
+      "area": "Registration and accounts",
+      "title": "Reject member younger than 14",
+      "input": "sp_register_member with date of birth 10 years ago",
+      "expected": "Error from trg_members_bi; user row rolled back",
+      "actual": "ERROR 1644 Members must be at least 14 years old; users before/after: 117/117",
+      "pass": true
+    },
+    {
+      "id": "T03",
+      "area": "Registration and accounts",
+      "title": "Reject duplicate e-mail",
+      "input": "Register again with TEST.A@example.test",
+      "expected": "Duplicate entry error (UNIQUE uq_users_email)",
+      "actual": "ERROR 1062 Duplicate entry 'test.a@example.test' for key 'users.uq_users_email'",
+      "pass": true
+    },
+    {
+      "id": "T04",
+      "area": "Registration and accounts",
+      "title": "Reject invalid phone number",
+      "input": "INSERT INTO users … phone '12345'",
+      "expected": "CHECK constraint chk_users_phone violated",
+      "actual": "ERROR 3819 Check constraint 'chk_users_phone' is violated.",
+      "pass": true
+    },
+    {
+      "id": "T05",
+      "area": "Registration and accounts",
+      "title": "Reject invalid e-mail",
+      "input": "INSERT INTO users … email 'not-an-email'",
+      "expected": "CHECK constraint chk_users_email violated",
+      "actual": "ERROR 3819 Check constraint 'chk_users_email' is violated.",
+      "pass": true
+    },
+    {
+      "id": "T06",
+      "area": "Registration and accounts",
+      "title": "Passwords are stored only as bcrypt hashes",
+      "input": "SELECT password_hash FROM users",
+      "expected": "Every hash is 60 chars and starts with $2",
+      "actual": "117 of 117 rows are bcrypt hashes",
+      "pass": true
+    },
+    {
+      "id": "T07",
+      "area": "Memberships and payments",
+      "title": "Buy a membership",
+      "input": "CALL sp_purchase_membership(M1, 'Monthly Plus', 'upi', admin)",
+      "expected": "Membership starts today, end date filled by trigger from plan duration, completed payment for the plan price",
+      "actual": "2026-11-14 → 2026-12-13 (30 days, active); payment ₹2500.00 completed",
+      "pass": true
+    },
+    {
+      "id": "T08",
+      "area": "Memberships and payments",
+      "title": "Renewal is queued after the current plan",
+      "input": "Buy the same plan again for M1",
+      "expected": "New membership starts the day after the current one ends (no overlap)",
+      "actual": "current ends 2026-12-13, renewal starts 2026-12-14",
+      "pass": true
+    },
+    {
+      "id": "T09",
+      "area": "Memberships and payments",
+      "title": "Overlapping membership is blocked",
+      "input": "INSERT a second membership for M1 covering today",
+      "expected": "Error from trg_memberships_bi",
+      "actual": "ERROR 1644 Member already has a membership covering these dates",
+      "pass": true
+    },
+    {
+      "id": "T10",
+      "area": "Memberships and payments",
+      "title": "Inactive plan cannot be bought",
+      "input": "sp_purchase_membership with a switched-off plan",
+      "expected": "Error 'This plan is no longer offered'",
+      "actual": "ERROR 1644 This plan is no longer offered",
+      "pass": true
+    },
+    {
+      "id": "T11",
+      "area": "Memberships and payments",
+      "title": "Freeze a membership",
+      "input": "Member M4 buys 'Monthly Plus', then sp_freeze_membership",
+      "expected": "Status frozen, frozen_from = today",
+      "actual": "status frozen, frozen_from 2026-11-14",
+      "pass": true
+    },
+    {
+      "id": "T12",
+      "area": "Memberships and payments",
+      "title": "Frozen member cannot check in",
+      "input": "CALL sp_check_in('<M4 code>')",
+      "expected": "Error from trg_attendance_bi: 'Membership is frozen…'",
+      "actual": "ERROR 1644 Membership is frozen. Unfreeze it to check in",
+      "pass": true
+    },
+    {
+      "id": "T13",
+      "area": "Memberships and payments",
+      "title": "Unfreeze adds the frozen days to the end date",
+      "input": "Set frozen_from 5 days back, then sp_unfreeze_membership",
+      "expected": "days_added = 5, end date +5, freeze_days_used = 5, status active",
+      "actual": "days_added 5; end 2026-12-13 → 2026-12-18; used 5; active",
+      "pass": true
+    },
+    {
+      "id": "T14",
+      "area": "Memberships and payments",
+      "title": "Frozen flag and frozen_from must match",
+      "input": "UPDATE memberships SET status = 'frozen' (frozen_from stays NULL)",
+      "expected": "CHECK constraint chk_memberships_frozen violated",
+      "actual": "ERROR 3819 Check constraint 'chk_memberships_frozen' is violated.",
+      "pass": true
+    },
+    {
+      "id": "T15",
+      "area": "Memberships and payments",
+      "title": "Payment must be for exactly one thing",
+      "input": "INSERT payment with membership_id and pt_session_id both NULL",
+      "expected": "CHECK constraint chk_payments_target violated",
+      "actual": "ERROR 3819 Check constraint 'chk_payments_target' is violated.",
+      "pass": true
+    },
+    {
+      "id": "T16",
+      "area": "Memberships and payments",
+      "title": "Payment amount must be positive",
+      "input": "INSERT payment with amount 0",
+      "expected": "CHECK constraint chk_payments_amount violated",
+      "actual": "ERROR 3819 Check constraint 'chk_payments_amount' is violated.",
+      "pass": true
+    },
+    {
+      "id": "T17",
+      "area": "Memberships and payments",
+      "title": "Payments cannot be deleted",
+      "input": "DELETE FROM payments WHERE payment_id = <M1 payment>",
+      "expected": "Error from trg_payments_bd 'Payments cannot be deleted; refund them instead'",
+      "actual": "ERROR 1644 Payments cannot be deleted; refund them instead",
+      "pass": true
+    },
+    {
+      "id": "T18",
+      "area": "Memberships and payments",
+      "title": "Payment details cannot be edited",
+      "input": "UPDATE payments SET amount = 1",
+      "expected": "Error from trg_payments_bu",
+      "actual": "ERROR 1644 Payment details cannot be edited; refund it instead",
+      "pass": true
+    },
+    {
+      "id": "T19",
+      "area": "Memberships and payments",
+      "title": "Refund is recorded in the audit log",
+      "input": "UPDATE payments SET status = 'refunded'",
+      "expected": "Status refunded; trg_payments_au writes old/new JSON to audit_log",
+      "actual": "audit_log: {\"status\":\"completed\"} → {\"status\":\"refunded\"} by gym_app@localhost",
+      "pass": true
+    },
+    {
+      "id": "T20",
+      "area": "Memberships and payments",
+      "title": "A refund cannot be undone",
+      "input": "UPDATE payments SET status = 'completed' on the refunded payment",
+      "expected": "Error from trg_payments_bu",
+      "actual": "ERROR 1644 A refunded payment cannot be restored",
+      "pass": true
+    },
+    {
+      "id": "T21",
+      "area": "Front desk (attendance)",
+      "title": "Check in an active member",
+      "input": "CALL sp_check_in(<M1 code>)",
+      "expected": "attendance row created, member name returned",
+      "actual": "attendance_id 7649, name \"Test A\" (code typed lower-case with a space)",
+      "pass": true
+    },
+    {
+      "id": "T22",
+      "area": "Front desk (attendance)",
+      "title": "Double check-in is refused",
+      "input": "CALL sp_check_in(<M1 code>) again",
+      "expected": "Error 'Member is already checked in'",
+      "actual": "ERROR 1644 Member is already checked in",
+      "pass": true
+    },
+    {
+      "id": "T23",
+      "area": "Front desk (attendance)",
+      "title": "Check out",
+      "input": "CALL sp_check_out(<M1 code>)",
+      "expected": "Visit closed, minutes returned, check_out > check_in",
+      "actual": "0 min, 2026-11-14 23:40:54 → 2026-11-14 23:41:54",
+      "pass": true
+    },
+    {
+      "id": "T24",
+      "area": "Front desk (attendance)",
+      "title": "Member without a plan cannot check in",
+      "input": "Register M5 (no purchase), sp_check_in",
+      "expected": "Error 'Member has no active membership for today'",
+      "actual": "ERROR 1644 Member has no active membership for today",
+      "pass": true
+    },
+    {
+      "id": "T25",
+      "area": "Front desk (attendance)",
+      "title": "Unknown member code",
+      "input": "CALL sp_check_in('GM999999')",
+      "expected": "Error 'No active member with that code'",
+      "actual": "ERROR 1644 No active member with that code",
+      "pass": true
+    },
+    {
+      "id": "T26",
+      "area": "Front desk (attendance)",
+      "title": "Check-out before check-in is impossible",
+      "input": "UPDATE attendance SET check_out = check_in - 1 hour",
+      "expected": "CHECK constraint chk_attendance_times violated",
+      "actual": "ERROR 3819 Check constraint 'chk_attendance_times' is violated.",
+      "pass": true
+    },
+    {
+      "id": "T27",
+      "area": "Group classes and waitlist",
+      "title": "Create a class; end time filled by trigger",
+      "input": "INSERT class_sessions (type 'Mobility & Stretch', ends_at NULL, capacity 1) on 2026-11-20 01:00",
+      "expected": "ends_at = starts_at + 30 min",
+      "actual": "2026-11-20 01:00:00 → 2026-11-20 01:30:00 (30 min)",
+      "pass": true
+    },
+    {
+      "id": "T28",
+      "area": "Group classes and waitlist",
+      "title": "Capacity cannot exceed the room",
+      "input": "INSERT class with capacity 13 in 'Functional Zone' (capacity 12)",
+      "expected": "Error from trg_class_sessions_bi",
+      "actual": "ERROR 1644 Class capacity is larger than the room capacity",
+      "pass": true
+    },
+    {
+      "id": "T29",
+      "area": "Group classes and waitlist",
+      "title": "Room double-booking is blocked",
+      "input": "INSERT another class in 'Functional Zone' at the same time with another trainer",
+      "expected": "Error from trg_class_sessions_bi (room clash)",
+      "actual": "ERROR 1644 Room is already booked for another class at that time",
+      "pass": true
+    },
+    {
+      "id": "T30",
+      "area": "Group classes and waitlist",
+      "title": "Trainer double-booking is blocked",
+      "input": "INSERT a class for the same trainer at the same time in another room",
+      "expected": "Error from sp_assert_trainer_free (called by the trigger)",
+      "actual": "ERROR 1644 Trainer is already teaching a class at that time",
+      "pass": true
+    },
+    {
+      "id": "T31",
+      "area": "Group classes and waitlist",
+      "title": "First booking takes the seat",
+      "input": "M1 books class C1 (capacity 1)",
+      "expected": "status 'booked'",
+      "actual": "booking 3935: booked",
+      "pass": true
+    },
+    {
+      "id": "T32",
+      "area": "Group classes and waitlist",
+      "title": "Full class puts the next member on the waitlist",
+      "input": "M2 buys 'Monthly Plus' and books C1",
+      "expected": "status 'waitlisted'",
+      "actual": "booking 3936: waitlisted",
+      "pass": true
+    },
+    {
+      "id": "T33",
+      "area": "Group classes and waitlist",
+      "title": "Same class cannot be booked twice",
+      "input": "M1 books C1 again",
+      "expected": "Error 'You have already booked this class'",
+      "actual": "ERROR 1644 You have already booked this class",
+      "pass": true
+    },
+    {
+      "id": "T34",
+      "area": "Group classes and waitlist",
+      "title": "Cancelling promotes the first waitlisted member",
+      "input": "M1 cancels with sp_cancel_class_booking",
+      "expected": "M1 cancelled, M2 promoted to booked",
+      "actual": "promoted member 114 (M2 = 114); statuses cancelled, booked",
+      "pass": true
+    },
+    {
+      "id": "T35",
+      "area": "Group classes and waitlist",
+      "title": "No booking without a membership",
+      "input": "M5 (no plan) books a class",
+      "expected": "Error 'You need an active membership…'",
+      "actual": "ERROR 1644 You need an active membership on the day of this class",
+      "pass": true
+    },
+    {
+      "id": "T36",
+      "area": "Group classes and waitlist",
+      "title": "Weekly class limit of the plan",
+      "input": "New member M3 on 'Monthly Basic' (3 classes/week) books 4 classes in one week",
+      "expected": "First 3 booked, next one refused",
+      "actual": "booked, booked, booked; then ERROR 1644 Weekly class limit of your plan reached",
+      "pass": true
+    },
+    {
+      "id": "T37",
+      "area": "Group classes and waitlist",
+      "title": "Cancelling a class cancels its bookings",
+      "input": "UPDATE class_sessions SET status = 'cancelled' for C1",
+      "expected": "trg_class_sessions_au sets every booking of C1 to cancelled",
+      "actual": "bookings still open: 0",
+      "pass": true
+    },
+    {
+      "id": "T38",
+      "area": "Personal training",
+      "title": "Request a PT session",
+      "input": "sp_book_pt_session(M1, trainer 1, 2026-11-16 10:00:00, 60 min)",
+      "expected": "status 'requested', price 0 if the plan includes PT else the trainer's hourly rate",
+      "actual": "pt_session 169: requested, price ₹0.00 (plan includes 1)",
+      "pass": true
+    },
+    {
+      "id": "T39",
+      "area": "Personal training",
+      "title": "Trainer cannot have two sessions at once",
+      "input": "M2 requests the same trainer at the same time",
+      "expected": "Error from trg_pt_sessions_bi",
+      "actual": "ERROR 1644 Trainer already has a personal training session at that time",
+      "pass": true
+    },
+    {
+      "id": "T40",
+      "area": "Personal training",
+      "title": "PT must be booked 2 hours ahead",
+      "input": "Start time NOW() + 1 hour",
+      "expected": "Error 'Book personal training at least 2 hours ahead'",
+      "actual": "ERROR 1644 Book personal training at least 2 hours ahead",
+      "pass": true
+    },
+    {
+      "id": "T41",
+      "area": "Personal training",
+      "title": "PT only during opening hours",
+      "input": "Start 21:30 for 60 minutes",
+      "expected": "Error 'The gym is open from 06:00 to 22:00'",
+      "actual": "ERROR 1644 The gym is open from 06:00 to 22:00",
+      "pass": true
+    },
+    {
+      "id": "T42",
+      "area": "Personal training",
+      "title": "Finished PT session cannot be reopened",
+      "input": "Set status completed, then back to 'requested'",
+      "expected": "Error from trg_pt_sessions_bu; status change written to audit_log",
+      "actual": "ERROR 1644 A finished or cancelled session cannot change status; audit rows for this session: 2",
+      "pass": true
+    },
+    {
+      "id": "T43",
+      "area": "Scheduled events (procedures they call)",
+      "title": "Expired memberships are closed",
+      "input": "Move M5's new membership into the past, CALL sp_expire_memberships()",
+      "expected": "status becomes 'expired'",
+      "actual": "end 2026-10-14 → expired",
+      "pass": true
+    },
+    {
+      "id": "T44",
+      "area": "Scheduled events (procedures they call)",
+      "title": "Finished classes are completed and absentees marked no-show",
+      "input": "Move a booked class into the past, CALL sp_close_finished_classes()",
+      "expected": "class 'completed', booking 'no_show'",
+      "actual": "class completed, booking no_show",
+      "pass": true
+    },
+    {
+      "id": "T45",
+      "area": "Security (least privilege)",
+      "title": "App account cannot DROP a table",
+      "input": "DROP TABLE payments",
+      "expected": "Access denied for gym_app",
+      "actual": "ERROR 1142 DROP command denied to user 'gym_app'@'localhost' for table 'payments'",
+      "pass": true
+    },
+    {
+      "id": "T46",
+      "area": "Security (least privilege)",
+      "title": "App account cannot ALTER a table",
+      "input": "ALTER TABLE users ADD COLUMN x INT",
+      "expected": "Access denied for gym_app",
+      "actual": "ERROR 1142 ALTER command denied to user 'gym_app'@'localhost' for table 'users'",
+      "pass": true
+    },
+    {
+      "id": "T47",
+      "area": "Security (least privilege)",
+      "title": "App account cannot create triggers",
+      "input": "CREATE TRIGGER t BEFORE INSERT ON users FOR EACH ROW SET NEW.role = 'admin'",
+      "expected": "Access denied for gym_app",
+      "actual": "ERROR 1419 You do not have the SUPER privilege and binary logging is enabled (you *might* want to use the less safe log_bin_trust_function_creators variable)",
+      "pass": true
+    },
+    {
+      "id": "T48",
+      "area": "MongoDB validation and indexes",
+      "title": "Valid workout log is accepted",
+      "input": "insertOne({ memberId, performedAt, durationMin: 45, rpe: 7, exercises: [ … 3 sets … ] })",
+      "expected": "Document inserted",
+      "actual": "inserted 6af8a42e4c7e6075a6349b7f",
+      "pass": true
+    },
+    {
+      "id": "T49",
+      "area": "MongoDB validation and indexes",
+      "title": "Workout of 2 minutes with RPE 15 is rejected",
+      "input": "insertOne({\"durationMin\":2,\"rpe\":15,\"exercises\":[]})",
+      "expected": "Document failed validation (durationMin 5–300, rpe 1–10)",
+      "actual": "code 121: Document failed validation",
+      "pass": true
+    },
+    {
+      "id": "T50",
+      "area": "MongoDB validation and indexes",
+      "title": "Unknown field inside a set is rejected",
+      "input": "insertOne({\"durationMin\":30,\"rpe\":5,\"exercises\":[{\"name\":\"x\",\"sets\":[{\"reps\":5,\"hack\":true}]}]})",
+      "expected": "Document failed validation (additionalProperties false)",
+      "actual": "code 121: Document failed validation",
+      "pass": true
+    },
+    {
+      "id": "T51",
+      "area": "MongoDB validation and indexes",
+      "title": "Log without memberId is rejected",
+      "input": "insertOne({\"durationMin\":30,\"rpe\":5,\"exercises\":[]})",
+      "expected": "Document failed validation (memberId required)",
+      "actual": "code 121: Document failed validation",
+      "pass": true
+    },
+    {
+      "id": "T52",
+      "area": "MongoDB validation and indexes",
+      "title": "Workout plan needs at least one day",
+      "input": "workout_plans.insertOne({ …, days: [] })",
+      "expected": "Document failed validation (minItems 1)",
+      "actual": "code 121: Document failed validation",
+      "pass": true
+    },
+    {
+      "id": "T53",
+      "area": "MongoDB validation and indexes",
+      "title": "Exercise slug is unique",
+      "input": "insert a second exercise with an existing slug",
+      "expected": "Duplicate key error E11000 (index uq_slug)",
+      "actual": "code 11000: E11000 duplicate key error collection: gym_test_mongo.exercises index: uq_slug",
+      "pass": true
+    },
+    {
+      "id": "T54",
+      "area": "MongoDB validation and indexes",
+      "title": "Weighted text search ranks name matches first",
+      "input": "find({ $text: { $search: 'squat' } }) sorted by textScore",
+      "expected": "Exercises with \"squat\" in the name come first",
+      "actual": "Goblet Squat (8.10), Barbell Back Squat (6.67), Box Jump (0.63)",
+      "pass": true
+    },
+    {
+      "id": "T55",
+      "area": "MongoDB validation and indexes",
+      "title": "Notifications expire after 60 days",
+      "input": "notifications.indexes()",
+      "expected": "TTL index on createdAt with expireAfterSeconds 5184000",
+      "actual": "ttl_60_days: { createdAt: 1 }, expireAfterSeconds 5184000",
+      "pass": true
+    }
+  ]
+}

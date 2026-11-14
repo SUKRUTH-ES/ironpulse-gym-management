@@ -1,0 +1,3409 @@
+{
+  "tables": [
+    {
+      "name": "class_types",
+      "comment": ""
+    },
+    {
+      "name": "members",
+      "comment": ""
+    },
+    {
+      "name": "membership_plans",
+      "comment": ""
+    },
+    {
+      "name": "memberships",
+      "comment": ""
+    },
+    {
+      "name": "rooms",
+      "comment": ""
+    },
+    {
+      "name": "attendance",
+      "comment": ""
+    },
+    {
+      "name": "audit_log",
+      "comment": ""
+    },
+    {
+      "name": "class_bookings",
+      "comment": ""
+    },
+    {
+      "name": "class_sessions",
+      "comment": ""
+    },
+    {
+      "name": "payments",
+      "comment": ""
+    },
+    {
+      "name": "pt_sessions",
+      "comment": ""
+    },
+    {
+      "name": "trainers",
+      "comment": ""
+    },
+    {
+      "name": "users",
+      "comment": ""
+    }
+  ],
+  "columns": [
+    {
+      "tbl": "attendance",
+      "col": "attendance_id",
+      "type": "bigint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "attendance",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "attendance",
+      "col": "check_in",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "attendance",
+      "col": "check_out",
+      "type": "datetime",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "audit_log",
+      "col": "audit_id",
+      "type": "bigint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "audit_log",
+      "col": "table_name",
+      "type": "varchar(64)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "audit_log",
+      "col": "record_id",
+      "type": "bigint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "audit_log",
+      "col": "action",
+      "type": "enum('INSERT','UPDATE','DELETE')",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "audit_log",
+      "col": "old_value",
+      "type": "json",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "audit_log",
+      "col": "new_value",
+      "type": "json",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "audit_log",
+      "col": "changed_by",
+      "type": "varchar(288)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "audit_log",
+      "col": "changed_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": "CURRENT_TIMESTAMP",
+      "ckey": "",
+      "extra": "DEFAULT_GENERATED",
+      "comment": ""
+    },
+    {
+      "tbl": "class_bookings",
+      "col": "booking_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "class_bookings",
+      "col": "class_session_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_bookings",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_bookings",
+      "col": "status",
+      "type": "enum('booked','waitlisted','cancelled','attended','no_show')",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_bookings",
+      "col": "booked_at",
+      "type": "datetime(3)",
+      "nullable": "NO",
+      "def": "CURRENT_TIMESTAMP(3)",
+      "ckey": "",
+      "extra": "DEFAULT_GENERATED",
+      "comment": ""
+    },
+    {
+      "tbl": "class_bookings",
+      "col": "updated_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": "CURRENT_TIMESTAMP",
+      "ckey": "",
+      "extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+      "comment": ""
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "class_session_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "class_type_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "trainer_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "room_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "starts_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "ends_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "capacity",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "status",
+      "type": "enum('scheduled','cancelled','completed')",
+      "nullable": "NO",
+      "def": "scheduled",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_types",
+      "col": "class_type_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "class_types",
+      "col": "name",
+      "type": "varchar(50)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_types",
+      "col": "description",
+      "type": "text",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_types",
+      "col": "intensity",
+      "type": "enum('low','medium','high')",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "class_types",
+      "col": "duration_min",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "user_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "member_code",
+      "type": "char(8)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "date_of_birth",
+      "type": "date",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "gender",
+      "type": "enum('male','female','other')",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "height_cm",
+      "type": "decimal(5,1)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "fitness_goal",
+      "type": "enum('weight_loss','muscle_gain','endurance','flexibility','general_fitness')",
+      "nullable": "NO",
+      "def": "general_fitness",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "emergency_contact_name",
+      "type": "varchar(100)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "emergency_contact_phone",
+      "type": "char(10)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "members",
+      "col": "joined_on",
+      "type": "date",
+      "nullable": "NO",
+      "def": "curdate()",
+      "ckey": "",
+      "extra": "DEFAULT_GENERATED",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "plan_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "name",
+      "type": "varchar(50)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "description",
+      "type": "varchar(255)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "duration_days",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "price",
+      "type": "decimal(10,2)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "classes_per_week",
+      "type": "tinyint unsigned",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "pt_sessions_included",
+      "type": "tinyint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "max_freeze_days",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "membership_plans",
+      "col": "is_active",
+      "type": "tinyint(1)",
+      "nullable": "NO",
+      "def": "1",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "membership_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "plan_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "start_date",
+      "type": "date",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "end_date",
+      "type": "date",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "status",
+      "type": "enum('active','frozen','expired','cancelled')",
+      "nullable": "NO",
+      "def": "active",
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "freeze_days_used",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "frozen_from",
+      "type": "date",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "memberships",
+      "col": "created_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": "CURRENT_TIMESTAMP",
+      "ckey": "",
+      "extra": "DEFAULT_GENERATED",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "payment_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "membership_id",
+      "type": "int unsigned",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "pt_session_id",
+      "type": "int unsigned",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "amount",
+      "type": "decimal(10,2)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "method",
+      "type": "enum('cash','card','upi','netbanking')",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "status",
+      "type": "enum('completed','refunded')",
+      "nullable": "NO",
+      "def": "completed",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "transaction_ref",
+      "type": "varchar(40)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "paid_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": "CURRENT_TIMESTAMP",
+      "ckey": "MUL",
+      "extra": "DEFAULT_GENERATED",
+      "comment": ""
+    },
+    {
+      "tbl": "payments",
+      "col": "recorded_by",
+      "type": "int unsigned",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "pt_session_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "trainer_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "starts_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "ends_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "status",
+      "type": "enum('requested','confirmed','completed','cancelled')",
+      "nullable": "NO",
+      "def": "requested",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "price",
+      "type": "decimal(8,2)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "member_note",
+      "type": "varchar(255)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "created_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": "CURRENT_TIMESTAMP",
+      "ckey": "",
+      "extra": "DEFAULT_GENERATED",
+      "comment": ""
+    },
+    {
+      "tbl": "rooms",
+      "col": "room_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "rooms",
+      "col": "name",
+      "type": "varchar(50)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "rooms",
+      "col": "capacity",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "trainers",
+      "col": "trainer_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "trainers",
+      "col": "user_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "trainers",
+      "col": "specialization",
+      "type": "varchar(100)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "MUL",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "trainers",
+      "col": "bio",
+      "type": "text",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "trainers",
+      "col": "experience_years",
+      "type": "tinyint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "trainers",
+      "col": "session_rate",
+      "type": "decimal(8,2)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "trainers",
+      "col": "accepts_pt",
+      "type": "tinyint(1)",
+      "nullable": "NO",
+      "def": "1",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "trainers",
+      "col": "hired_on",
+      "type": "date",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "user_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "PRI",
+      "extra": "auto_increment",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "email",
+      "type": "varchar(255)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "password_hash",
+      "type": "char(60)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "password_changed_at",
+      "type": "datetime",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "role",
+      "type": "enum('admin','trainer','member')",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "full_name",
+      "type": "varchar(100)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "phone",
+      "type": "char(10)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "UNI",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "is_active",
+      "type": "tinyint(1)",
+      "nullable": "NO",
+      "def": "1",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "created_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": "CURRENT_TIMESTAMP",
+      "ckey": "",
+      "extra": "DEFAULT_GENERATED",
+      "comment": ""
+    },
+    {
+      "tbl": "users",
+      "col": "last_login_at",
+      "type": "datetime",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "YES",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "member_code",
+      "type": "char(8)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "full_name",
+      "type": "varchar(100)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "phone",
+      "type": "char(10)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "plan_name",
+      "type": "varchar(50)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "membership_end",
+      "type": "date",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "last_visit",
+      "type": "datetime",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "visits_prev_30",
+      "type": "decimal(23,0)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "visits_last_30",
+      "type": "decimal(23,0)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_churn_risk",
+      "col": "days_since_last_visit",
+      "type": "int",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "class_session_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "starts_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "ends_at",
+      "type": "datetime",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "status",
+      "type": "enum('scheduled','cancelled','completed')",
+      "nullable": "NO",
+      "def": "scheduled",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "capacity",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "class_type_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "class_name",
+      "type": "varchar(50)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "intensity",
+      "type": "enum('low','medium','high')",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "trainer_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "trainer_name",
+      "type": "varchar(100)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "room_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "room_name",
+      "type": "varchar(50)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "booked_count",
+      "type": "decimal(23,0)",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "waitlist_count",
+      "type": "decimal(23,0)",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_class_schedule",
+      "col": "seats_left",
+      "type": "decimal(24,0)",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "membership_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "plan_id",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "plan_name",
+      "type": "varchar(50)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "start_date",
+      "type": "date",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "end_date",
+      "type": "date",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "status",
+      "type": "enum('active','frozen','expired','cancelled')",
+      "nullable": "NO",
+      "def": "active",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "frozen_from",
+      "type": "date",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "freeze_days_used",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "max_freeze_days",
+      "type": "smallint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "classes_per_week",
+      "type": "tinyint unsigned",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "pt_sessions_included",
+      "type": "tinyint unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_current_memberships",
+      "col": "days_left",
+      "type": "int",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_expiring_memberships",
+      "col": "membership_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_expiring_memberships",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_expiring_memberships",
+      "col": "full_name",
+      "type": "varchar(100)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_expiring_memberships",
+      "col": "email",
+      "type": "varchar(255)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_expiring_memberships",
+      "col": "phone",
+      "type": "char(10)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_expiring_memberships",
+      "col": "plan_name",
+      "type": "varchar(50)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_expiring_memberships",
+      "col": "end_date",
+      "type": "date",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_expiring_memberships",
+      "col": "days_left",
+      "type": "int",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "member_id",
+      "type": "int unsigned",
+      "nullable": "YES",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "member_code",
+      "type": "char(8)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "user_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "full_name",
+      "type": "varchar(100)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "email",
+      "type": "varchar(255)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "phone",
+      "type": "char(10)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "is_active",
+      "type": "tinyint(1)",
+      "nullable": "NO",
+      "def": "1",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "gender",
+      "type": "enum('male','female','other')",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "date_of_birth",
+      "type": "date",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "age",
+      "type": "bigint",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "fitness_goal",
+      "type": "enum('weight_loss','muscle_gain','endurance','flexibility','general_fitness')",
+      "nullable": "YES",
+      "def": "general_fitness",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "joined_on",
+      "type": "date",
+      "nullable": "YES",
+      "def": "curdate()",
+      "ckey": "",
+      "extra": "DEFAULT_GENERATED",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "membership_id",
+      "type": "int unsigned",
+      "nullable": "YES",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "plan_name",
+      "type": "varchar(50)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "membership_end",
+      "type": "date",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "days_left",
+      "type": "int",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "membership_status",
+      "type": "varchar(9)",
+      "nullable": "NO",
+      "def": "",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_member_overview",
+      "col": "last_visit",
+      "type": "datetime",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_monthly_revenue",
+      "col": "month",
+      "type": "varchar(7)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_monthly_revenue",
+      "col": "membership_revenue",
+      "type": "decimal(32,2)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_monthly_revenue",
+      "col": "pt_revenue",
+      "type": "decimal(32,2)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_monthly_revenue",
+      "col": "total_revenue",
+      "type": "decimal(32,2)",
+      "nullable": "YES",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_monthly_revenue",
+      "col": "payment_count",
+      "type": "bigint",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_trainer_performance",
+      "col": "trainer_id",
+      "type": "int unsigned",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_trainer_performance",
+      "col": "trainer_name",
+      "type": "varchar(100)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_trainer_performance",
+      "col": "specialization",
+      "type": "varchar(100)",
+      "nullable": "NO",
+      "def": null,
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_trainer_performance",
+      "col": "classes_taught",
+      "type": "bigint",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_trainer_performance",
+      "col": "avg_occupancy_pct",
+      "type": "decimal(28,1)",
+      "nullable": "NO",
+      "def": "0.0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_trainer_performance",
+      "col": "pt_sessions_completed",
+      "type": "bigint",
+      "nullable": "NO",
+      "def": "0",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    },
+    {
+      "tbl": "v_trainer_performance",
+      "col": "pt_revenue",
+      "type": "decimal(32,2)",
+      "nullable": "NO",
+      "def": "0.00",
+      "ckey": "",
+      "extra": "",
+      "comment": ""
+    }
+  ],
+  "fks": [
+    {
+      "tbl": "attendance",
+      "col": "member_id",
+      "ref_tbl": "members",
+      "ref_col": "member_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_attendance_member"
+    },
+    {
+      "tbl": "class_bookings",
+      "col": "member_id",
+      "ref_tbl": "members",
+      "ref_col": "member_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_cb_member"
+    },
+    {
+      "tbl": "class_bookings",
+      "col": "class_session_id",
+      "ref_tbl": "class_sessions",
+      "ref_col": "class_session_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_cb_session"
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "room_id",
+      "ref_tbl": "rooms",
+      "ref_col": "room_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_cs_room"
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "trainer_id",
+      "ref_tbl": "trainers",
+      "ref_col": "trainer_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_cs_trainer"
+    },
+    {
+      "tbl": "class_sessions",
+      "col": "class_type_id",
+      "ref_tbl": "class_types",
+      "ref_col": "class_type_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_cs_type"
+    },
+    {
+      "tbl": "members",
+      "col": "user_id",
+      "ref_tbl": "users",
+      "ref_col": "user_id",
+      "on_delete": "CASCADE",
+      "name": "fk_members_user"
+    },
+    {
+      "tbl": "memberships",
+      "col": "member_id",
+      "ref_tbl": "members",
+      "ref_col": "member_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_memberships_member"
+    },
+    {
+      "tbl": "memberships",
+      "col": "plan_id",
+      "ref_tbl": "membership_plans",
+      "ref_col": "plan_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_memberships_plan"
+    },
+    {
+      "tbl": "payments",
+      "col": "member_id",
+      "ref_tbl": "members",
+      "ref_col": "member_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_payments_member"
+    },
+    {
+      "tbl": "payments",
+      "col": "membership_id",
+      "ref_tbl": "memberships",
+      "ref_col": "membership_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_payments_membership"
+    },
+    {
+      "tbl": "payments",
+      "col": "pt_session_id",
+      "ref_tbl": "pt_sessions",
+      "ref_col": "pt_session_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_payments_pt"
+    },
+    {
+      "tbl": "payments",
+      "col": "recorded_by",
+      "ref_tbl": "users",
+      "ref_col": "user_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_payments_recorder"
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "member_id",
+      "ref_tbl": "members",
+      "ref_col": "member_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_pt_member"
+    },
+    {
+      "tbl": "pt_sessions",
+      "col": "trainer_id",
+      "ref_tbl": "trainers",
+      "ref_col": "trainer_id",
+      "on_delete": "NO ACTION",
+      "name": "fk_pt_trainer"
+    },
+    {
+      "tbl": "trainers",
+      "col": "user_id",
+      "ref_tbl": "users",
+      "ref_col": "user_id",
+      "on_delete": "CASCADE",
+      "name": "fk_trainers_user"
+    }
+  ],
+  "checks": [
+    {
+      "tbl": "attendance",
+      "name": "chk_attendance_times",
+      "clause": "((`check_out` is null) or (`check_out` > `check_in`))"
+    },
+    {
+      "tbl": "class_sessions",
+      "name": "chk_cs_capacity",
+      "clause": "(`capacity` > 0)"
+    },
+    {
+      "tbl": "class_sessions",
+      "name": "chk_cs_times",
+      "clause": "(`ends_at` > `starts_at`)"
+    },
+    {
+      "tbl": "class_types",
+      "name": "chk_class_types_duration",
+      "clause": "(`duration_min` between 15 and 180)"
+    },
+    {
+      "tbl": "members",
+      "name": "chk_members_code",
+      "clause": "regexp_like(`member_code`,_utf8mb4\\'^GM[0-9]{6}$\\')"
+    },
+    {
+      "tbl": "members",
+      "name": "chk_members_ephone",
+      "clause": "((`emergency_contact_phone` is null) or regexp_like(`emergency_contact_phone`,_utf8mb4\\'^[6-9][0-9]{9}$\\'))"
+    },
+    {
+      "tbl": "members",
+      "name": "chk_members_height",
+      "clause": "((`height_cm` is null) or (`height_cm` between 100 and 250))"
+    },
+    {
+      "tbl": "membership_plans",
+      "name": "chk_plans_duration",
+      "clause": "(`duration_days` between 1 and 730)"
+    },
+    {
+      "tbl": "membership_plans",
+      "name": "chk_plans_freeze",
+      "clause": "(`max_freeze_days` <= `duration_days`)"
+    },
+    {
+      "tbl": "membership_plans",
+      "name": "chk_plans_price",
+      "clause": "(`price` >= 0)"
+    },
+    {
+      "tbl": "memberships",
+      "name": "chk_memberships_dates",
+      "clause": "(`end_date` >= `start_date`)"
+    },
+    {
+      "tbl": "memberships",
+      "name": "chk_memberships_frozen",
+      "clause": "((`status` = _utf8mb4\\'frozen\\') = (`frozen_from` is not null))"
+    },
+    {
+      "tbl": "payments",
+      "name": "chk_payments_amount",
+      "clause": "(`amount` > 0)"
+    },
+    {
+      "tbl": "payments",
+      "name": "chk_payments_target",
+      "clause": "(((`membership_id` is not null) + (`pt_session_id` is not null)) = 1)"
+    },
+    {
+      "tbl": "pt_sessions",
+      "name": "chk_pt_price",
+      "clause": "(`price` >= 0)"
+    },
+    {
+      "tbl": "pt_sessions",
+      "name": "chk_pt_times",
+      "clause": "(`ends_at` > `starts_at`)"
+    },
+    {
+      "tbl": "rooms",
+      "name": "chk_rooms_capacity",
+      "clause": "(`capacity` between 1 and 200)"
+    },
+    {
+      "tbl": "trainers",
+      "name": "chk_trainers_exp",
+      "clause": "(`experience_years` <= 50)"
+    },
+    {
+      "tbl": "trainers",
+      "name": "chk_trainers_rate",
+      "clause": "(`session_rate` > 0)"
+    },
+    {
+      "tbl": "users",
+      "name": "chk_users_email",
+      "clause": "regexp_like(`email`,_utf8mb4\\'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\\\\\.[A-Za-z]{2,}$\\')"
+    },
+    {
+      "tbl": "users",
+      "name": "chk_users_name",
+      "clause": "(char_length(trim(`full_name`)) >= 2)"
+    },
+    {
+      "tbl": "users",
+      "name": "chk_users_phone",
+      "clause": "regexp_like(`phone`,_utf8mb4\\'^[6-9][0-9]{9}$\\')"
+    }
+  ],
+  "indexes": [
+    {
+      "tbl": "attendance",
+      "name": "idx_attendance_check_in",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "check_in"
+    },
+    {
+      "tbl": "attendance",
+      "name": "idx_attendance_member",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "member_id,check_in"
+    },
+    {
+      "tbl": "attendance",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "attendance_id"
+    },
+    {
+      "tbl": "audit_log",
+      "name": "idx_audit_table_record",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "table_name,record_id"
+    },
+    {
+      "tbl": "audit_log",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "audit_id"
+    },
+    {
+      "tbl": "class_bookings",
+      "name": "idx_cb_member",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "member_id,status"
+    },
+    {
+      "tbl": "class_bookings",
+      "name": "idx_cb_session_status",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "class_session_id,status,booked_at"
+    },
+    {
+      "tbl": "class_bookings",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "booking_id"
+    },
+    {
+      "tbl": "class_bookings",
+      "name": "uq_cb_member_session",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "class_session_id,member_id"
+    },
+    {
+      "tbl": "class_sessions",
+      "name": "fk_cs_type",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "class_type_id"
+    },
+    {
+      "tbl": "class_sessions",
+      "name": "idx_cs_room",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "room_id,starts_at"
+    },
+    {
+      "tbl": "class_sessions",
+      "name": "idx_cs_starts",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "starts_at"
+    },
+    {
+      "tbl": "class_sessions",
+      "name": "idx_cs_trainer",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "trainer_id,starts_at"
+    },
+    {
+      "tbl": "class_sessions",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "class_session_id"
+    },
+    {
+      "tbl": "class_types",
+      "name": "ft_class_types",
+      "non_unique": 1,
+      "type": "FULLTEXT",
+      "cols": "name,description"
+    },
+    {
+      "tbl": "class_types",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "class_type_id"
+    },
+    {
+      "tbl": "class_types",
+      "name": "uq_class_types_name",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "name"
+    },
+    {
+      "tbl": "members",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "member_id"
+    },
+    {
+      "tbl": "members",
+      "name": "uq_members_code",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "member_code"
+    },
+    {
+      "tbl": "members",
+      "name": "uq_members_user",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "user_id"
+    },
+    {
+      "tbl": "membership_plans",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "plan_id"
+    },
+    {
+      "tbl": "membership_plans",
+      "name": "uq_plans_name",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "name"
+    },
+    {
+      "tbl": "memberships",
+      "name": "fk_memberships_plan",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "plan_id"
+    },
+    {
+      "tbl": "memberships",
+      "name": "idx_memberships_member_dates",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "member_id,start_date,end_date"
+    },
+    {
+      "tbl": "memberships",
+      "name": "idx_memberships_status_end",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "status,end_date"
+    },
+    {
+      "tbl": "memberships",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "membership_id"
+    },
+    {
+      "tbl": "payments",
+      "name": "fk_payments_membership",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "membership_id"
+    },
+    {
+      "tbl": "payments",
+      "name": "fk_payments_pt",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "pt_session_id"
+    },
+    {
+      "tbl": "payments",
+      "name": "fk_payments_recorder",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "recorded_by"
+    },
+    {
+      "tbl": "payments",
+      "name": "idx_payments_member",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "member_id,paid_at"
+    },
+    {
+      "tbl": "payments",
+      "name": "idx_payments_paid_at",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "paid_at"
+    },
+    {
+      "tbl": "payments",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "payment_id"
+    },
+    {
+      "tbl": "payments",
+      "name": "uq_payments_ref",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "transaction_ref"
+    },
+    {
+      "tbl": "pt_sessions",
+      "name": "idx_pt_member",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "member_id,starts_at"
+    },
+    {
+      "tbl": "pt_sessions",
+      "name": "idx_pt_trainer",
+      "non_unique": 1,
+      "type": "BTREE",
+      "cols": "trainer_id,starts_at"
+    },
+    {
+      "tbl": "pt_sessions",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "pt_session_id"
+    },
+    {
+      "tbl": "rooms",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "room_id"
+    },
+    {
+      "tbl": "rooms",
+      "name": "uq_rooms_name",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "name"
+    },
+    {
+      "tbl": "trainers",
+      "name": "ft_trainers_profile",
+      "non_unique": 1,
+      "type": "FULLTEXT",
+      "cols": "specialization,bio"
+    },
+    {
+      "tbl": "trainers",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "trainer_id"
+    },
+    {
+      "tbl": "trainers",
+      "name": "uq_trainers_user",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "user_id"
+    },
+    {
+      "tbl": "users",
+      "name": "PRIMARY",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "user_id"
+    },
+    {
+      "tbl": "users",
+      "name": "uq_users_email",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "email"
+    },
+    {
+      "tbl": "users",
+      "name": "uq_users_phone",
+      "non_unique": 0,
+      "type": "BTREE",
+      "cols": "phone"
+    }
+  ],
+  "views": [
+    {
+      "name": "v_churn_risk"
+    },
+    {
+      "name": "v_class_schedule"
+    },
+    {
+      "name": "v_current_memberships"
+    },
+    {
+      "name": "v_expiring_memberships"
+    },
+    {
+      "name": "v_member_overview"
+    },
+    {
+      "name": "v_monthly_revenue"
+    },
+    {
+      "name": "v_trainer_performance"
+    }
+  ],
+  "routines": [
+    {
+      "name": "fn_active_membership_id",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "fn_classes_booked_in_week",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "fn_member_status",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "fn_pt_sessions_used",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "sp_add_trainer",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_assert_trainer_free",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_book_class",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_book_pt_session",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_cancel_class_booking",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_check_in",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_check_out",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_close_finished_classes",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_expire_memberships",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_freeze_membership",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_purchase_membership",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_register_member",
+      "type": "PROCEDURE"
+    },
+    {
+      "name": "sp_unfreeze_membership",
+      "type": "PROCEDURE"
+    }
+  ],
+  "triggers": [
+    {
+      "name": "trg_attendance_bi",
+      "tbl": "attendance",
+      "timing": "BEFORE",
+      "ev": "INSERT"
+    },
+    {
+      "name": "trg_class_sessions_au",
+      "tbl": "class_sessions",
+      "timing": "AFTER",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_class_sessions_bi",
+      "tbl": "class_sessions",
+      "timing": "BEFORE",
+      "ev": "INSERT"
+    },
+    {
+      "name": "trg_class_sessions_bu",
+      "tbl": "class_sessions",
+      "timing": "BEFORE",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_members_bi",
+      "tbl": "members",
+      "timing": "BEFORE",
+      "ev": "INSERT"
+    },
+    {
+      "name": "trg_members_bu",
+      "tbl": "members",
+      "timing": "BEFORE",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_memberships_au",
+      "tbl": "memberships",
+      "timing": "AFTER",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_memberships_bi",
+      "tbl": "memberships",
+      "timing": "BEFORE",
+      "ev": "INSERT"
+    },
+    {
+      "name": "trg_memberships_bu",
+      "tbl": "memberships",
+      "timing": "BEFORE",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_payments_ai",
+      "tbl": "payments",
+      "timing": "AFTER",
+      "ev": "INSERT"
+    },
+    {
+      "name": "trg_payments_au",
+      "tbl": "payments",
+      "timing": "AFTER",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_payments_bd",
+      "tbl": "payments",
+      "timing": "BEFORE",
+      "ev": "DELETE"
+    },
+    {
+      "name": "trg_payments_bu",
+      "tbl": "payments",
+      "timing": "BEFORE",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_pt_sessions_au",
+      "tbl": "pt_sessions",
+      "timing": "AFTER",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_pt_sessions_bi",
+      "tbl": "pt_sessions",
+      "timing": "BEFORE",
+      "ev": "INSERT"
+    },
+    {
+      "name": "trg_pt_sessions_bu",
+      "tbl": "pt_sessions",
+      "timing": "BEFORE",
+      "ev": "UPDATE"
+    },
+    {
+      "name": "trg_users_bi",
+      "tbl": "users",
+      "timing": "BEFORE",
+      "ev": "INSERT"
+    },
+    {
+      "name": "trg_users_bu",
+      "tbl": "users",
+      "timing": "BEFORE",
+      "ev": "UPDATE"
+    }
+  ],
+  "events": [
+    {
+      "name": "ev_daily_housekeeping",
+      "every": "1",
+      "unit": "DAY",
+      "status": "ENABLED"
+    },
+    {
+      "name": "ev_class_housekeeping",
+      "every": "15",
+      "unit": "MINUTE",
+      "status": "ENABLED"
+    }
+  ],
+  "rowCounts": {
+    "class_types": 10,
+    "members": 110,
+    "membership_plans": 7,
+    "memberships": 371,
+    "rooms": 4,
+    "attendance": 7648,
+    "audit_log": 683,
+    "class_bookings": 3934,
+    "class_sessions": 339,
+    "payments": 400,
+    "pt_sessions": 168,
+    "trainers": 5,
+    "users": 116
+  },
+  "mongo": [
+    {
+      "name": "workout_logs",
+      "type": "collection",
+      "options": {
+        "validator": {
+          "$jsonSchema": {
+            "bsonType": "object",
+            "required": [
+              "memberId",
+              "performedAt",
+              "durationMin"
+            ],
+            "properties": {
+              "memberId": {
+                "bsonType": "int"
+              },
+              "planId": {
+                "bsonType": [
+                  "objectId",
+                  "null"
+                ]
+              },
+              "performedAt": {
+                "bsonType": "date"
+              },
+              "durationMin": {
+                "bsonType": "int",
+                "minimum": 5,
+                "maximum": 300
+              },
+              "rpe": {
+                "bsonType": "int",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "notes": {
+                "bsonType": "string",
+                "maxLength": 500
+              },
+              "exercises": {
+                "bsonType": "array",
+                "items": {
+                  "bsonType": "object",
+                  "required": [
+                    "exerciseId",
+                    "name",
+                    "sets"
+                  ],
+                  "properties": {
+                    "exerciseId": {
+                      "bsonType": "objectId"
+                    },
+                    "name": {
+                      "bsonType": "string"
+                    },
+                    "sets": {
+                      "bsonType": "array",
+                      "minItems": 1,
+                      "items": {
+                        "bsonType": "object",
+                        "minProperties": 1,
+                        "additionalProperties": false,
+                        "properties": {
+                          "reps": {
+                            "bsonType": "int",
+                            "minimum": 0,
+                            "maximum": 200
+                          },
+                          "weightKg": {
+                            "bsonType": [
+                              "double",
+                              "int"
+                            ],
+                            "minimum": 0,
+                            "maximum": 600
+                          },
+                          "durationSec": {
+                            "bsonType": "int",
+                            "minimum": 1,
+                            "maximum": 10800
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cardio": {
+                "bsonType": "array",
+                "items": {
+                  "bsonType": "object",
+                  "required": [
+                    "activity",
+                    "minutes"
+                  ],
+                  "properties": {
+                    "activity": {
+                      "bsonType": "string"
+                    },
+                    "minutes": {
+                      "bsonType": "int",
+                      "minimum": 1,
+                      "maximum": 300
+                    },
+                    "distanceKm": {
+                      "bsonType": [
+                        "double",
+                        "int"
+                      ],
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "validationLevel": "strict",
+        "validationAction": "error"
+      },
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "memberId": 1,
+            "performedAt": -1
+          },
+          "name": "member_recent"
+        },
+        {
+          "v": 2,
+          "key": {
+            "exercises.exerciseId": 1
+          },
+          "name": "by_exercise"
+        }
+      ],
+      "count": 1151,
+      "sample": {
+        "_id": "6af8a380b87d2ab69f7e48ae",
+        "memberId": 81,
+        "planId": "6af8a380b87d2ab69f7e442f",
+        "performedAt": "2026-11-14T08:36:00.000Z",
+        "durationMin": 77,
+        "rpe": 8,
+        "exercises": [
+          {
+            "exerciseId": "6af8a380b87d2ab69f7e43e5",
+            "name": "Barbell Bench Press",
+            "sets": [
+              {
+                "reps": 5,
+                "weightKg": 32.5
+              },
+              {
+                "reps": 6,
+                "weightKg": 32.5
+              },
+              {
+                "reps": 5,
+                "weightKg": 32.5
+              },
+              {
+                "reps": 6,
+                "weightKg": 32.5
+              }
+            ]
+          },
+          {
+            "exerciseId": "6af8a380b87d2ab69f7e43e6",
+            "name": "Incline Dumbbell Press",
+            "sets": [
+              {
+                "reps": 10,
+                "weightKg": 10
+              },
+              {
+                "reps": 10,
+                "weightKg": 10
+              },
+              {
+                "reps": 7,
+                "weightKg": 10
+              }
+            ]
+          },
+          {
+            "exerciseId": "6af8a380b87d2ab69f7e43e9",
+            "name": "Overhead Press",
+            "sets": [
+              {
+                "reps": 9,
+                "weightKg": 20
+              },
+              {
+                "reps": 10,
+                "weightKg": 20
+              },
+              {
+                "reps": 8,
+                "weightKg": 20
+              }
+            ]
+          },
+          {
+            "exerciseId": "6af8a380b87d2ab69f7e43ea",
+            "name": "Lateral Raise",
+            "sets": [
+              {
+                "reps": 14,
+                "weightKg": 5
+              },
+              {
+                "reps": 12,
+                "weightKg": 5
+              },
+              {
+                "reps": 10,
+                "weightKg": 5
+              }
+            ]
+          },
+          {
+            "exerciseId": "6af8a380b87d2ab69f7e43f1",
+            "name": "Triceps Rope Pushdown",
+            "sets": [
+              {
+                "reps": 14,
+                "weightKg": 12.5
+              },
+              {
+                "reps": 11,
+                "weightKg": 12.5
+              },
+              {
+                "reps": 12,
+                "weightKg": 12.5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "exercises",
+      "type": "collection",
+      "options": {
+        "validator": {
+          "$jsonSchema": {
+            "bsonType": "object",
+            "required": [
+              "name",
+              "slug",
+              "category",
+              "primaryMuscle",
+              "level",
+              "equipment",
+              "instructions"
+            ],
+            "properties": {
+              "name": {
+                "bsonType": "string",
+                "minLength": 2
+              },
+              "slug": {
+                "bsonType": "string",
+                "pattern": "^[a-z0-9-]+$"
+              },
+              "category": {
+                "enum": [
+                  "strength",
+                  "cardio",
+                  "mobility",
+                  "plyometric"
+                ]
+              },
+              "primaryMuscle": {
+                "bsonType": "string"
+              },
+              "secondaryMuscles": {
+                "bsonType": "array",
+                "items": {
+                  "bsonType": "string"
+                }
+              },
+              "equipment": {
+                "bsonType": "array",
+                "items": {
+                  "bsonType": "string"
+                }
+              },
+              "level": {
+                "enum": [
+                  "beginner",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              "instructions": {
+                "bsonType": "array",
+                "minItems": 1,
+                "items": {
+                  "bsonType": "string"
+                }
+              },
+              "tags": {
+                "bsonType": "array",
+                "items": {
+                  "bsonType": "string"
+                }
+              },
+              "createdBy": {
+                "bsonType": "int"
+              }
+            }
+          }
+        },
+        "validationLevel": "strict",
+        "validationAction": "error"
+      },
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "slug": 1
+          },
+          "name": "uq_slug",
+          "unique": true
+        },
+        {
+          "v": 2,
+          "key": {
+            "primaryMuscle": 1,
+            "level": 1
+          },
+          "name": "muscle_level"
+        },
+        {
+          "v": 2,
+          "key": {
+            "createdBy": 1
+          },
+          "name": "by_creator"
+        },
+        {
+          "v": 2,
+          "key": {
+            "_fts": "text",
+            "_ftsx": 1
+          },
+          "name": "txt_exercise_search",
+          "weights": {
+            "instructions": 1,
+            "name": 10,
+            "primaryMuscle": 6,
+            "tags": 4
+          },
+          "default_language": "english",
+          "language_override": "language",
+          "textIndexVersion": 3
+        }
+      ],
+      "count": 38,
+      "sample": {
+        "_id": "6af8a380b87d2ab69f7e4402",
+        "name": "Dead Bug",
+        "slug": "dead-bug",
+        "category": "strength",
+        "primaryMuscle": "core",
+        "secondaryMuscles": [
+          "hip flexors"
+        ],
+        "equipment": [
+          "mat"
+        ],
+        "level": "beginner",
+        "tags": [
+          "core",
+          "abs",
+          "back pain",
+          "stability"
+        ],
+        "instructions": [
+          "Lie on your back, arms up, knees at 90 degrees",
+          "Lower opposite arm and leg while keeping the lower back flat"
+        ]
+      }
+    },
+    {
+      "name": "body_metrics",
+      "type": "timeseries",
+      "options": {
+        "timeseries": {
+          "timeField": "recordedAt",
+          "metaField": "memberId",
+          "granularity": "hours",
+          "bucketMaxSpanSeconds": 2592000
+        }
+      },
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "memberId": 1,
+            "recordedAt": 1
+          },
+          "name": "memberId_1_recordedAt_1"
+        },
+        {
+          "v": 2,
+          "key": {
+            "memberId": 1,
+            "recordedAt": -1
+          },
+          "name": "member_time"
+        }
+      ],
+      "count": 585,
+      "sample": {
+        "recordedAt": "2026-11-14T02:15:00.000Z",
+        "memberId": 81,
+        "bodyFatPct": 29,
+        "weightKg": 73.3,
+        "_id": "6af8a380b87d2ab69f7e4af7"
+      }
+    },
+    {
+      "name": "workout_plans",
+      "type": "collection",
+      "options": {
+        "validator": {
+          "$jsonSchema": {
+            "bsonType": "object",
+            "required": [
+              "memberId",
+              "title",
+              "goal",
+              "days",
+              "status",
+              "createdAt"
+            ],
+            "properties": {
+              "memberId": {
+                "bsonType": "int"
+              },
+              "trainerId": {
+                "bsonType": [
+                  "int",
+                  "null"
+                ]
+              },
+              "title": {
+                "bsonType": "string",
+                "minLength": 3,
+                "maxLength": 100
+              },
+              "goal": {
+                "enum": [
+                  "weight_loss",
+                  "muscle_gain",
+                  "endurance",
+                  "flexibility",
+                  "general_fitness"
+                ]
+              },
+              "durationWeeks": {
+                "bsonType": "int",
+                "minimum": 1,
+                "maximum": 52
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "archived"
+                ]
+              },
+              "days": {
+                "bsonType": "array",
+                "minItems": 1,
+                "maxItems": 7,
+                "items": {
+                  "bsonType": "object",
+                  "required": [
+                    "day",
+                    "title",
+                    "exercises"
+                  ],
+                  "properties": {
+                    "day": {
+                      "bsonType": "int",
+                      "minimum": 1,
+                      "maximum": 7
+                    },
+                    "title": {
+                      "bsonType": "string"
+                    },
+                    "exercises": {
+                      "bsonType": "array",
+                      "minItems": 1,
+                      "items": {
+                        "bsonType": "object",
+                        "required": [
+                          "exerciseId",
+                          "name",
+                          "sets"
+                        ],
+                        "properties": {
+                          "exerciseId": {
+                            "bsonType": "objectId"
+                          },
+                          "name": {
+                            "bsonType": "string"
+                          },
+                          "sets": {
+                            "bsonType": "int",
+                            "minimum": 1,
+                            "maximum": 10
+                          },
+                          "reps": {
+                            "bsonType": "string"
+                          },
+                          "restSec": {
+                            "bsonType": "int",
+                            "minimum": 0,
+                            "maximum": 600
+                          },
+                          "notes": {
+                            "bsonType": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "createdAt": {
+                "bsonType": "date"
+              },
+              "updatedAt": {
+                "bsonType": "date"
+              }
+            }
+          }
+        },
+        "validationLevel": "strict",
+        "validationAction": "error"
+      },
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "memberId": 1,
+            "status": 1
+          },
+          "name": "member_status"
+        },
+        {
+          "v": 2,
+          "key": {
+            "trainerId": 1,
+            "createdAt": -1
+          },
+          "name": "trainer_recent"
+        }
+      ],
+      "count": 45,
+      "sample": {
+        "_id": "6af8a380b87d2ab69f7e442f",
+        "memberId": 81,
+        "trainerId": 1,
+        "title": "Push Pull Legs Hypertrophy",
+        "goal": "muscle_gain",
+        "durationWeeks": 12,
+        "status": "active",
+        "days": [
+          {
+            "day": 1,
+            "title": "Push",
+            "exercises": [
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43e5",
+                "name": "Barbell Bench Press",
+                "sets": 4,
+                "reps": "6-8",
+                "restSec": 150
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43e6",
+                "name": "Incline Dumbbell Press",
+                "sets": 3,
+                "reps": "8-10",
+                "restSec": 90
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43e9",
+                "name": "Overhead Press",
+                "sets": 3,
+                "reps": "8-10",
+                "restSec": 120
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43ea",
+                "name": "Lateral Raise",
+                "sets": 3,
+                "reps": "12-15",
+                "restSec": 60
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43f1",
+                "name": "Triceps Rope Pushdown",
+                "sets": 3,
+                "reps": "12",
+                "restSec": 60
+              }
+            ]
+          },
+          {
+            "day": 2,
+            "title": "Pull",
+            "exercises": [
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43ec",
+                "name": "Pull-Up",
+                "sets": 4,
+                "reps": "6-8",
+                "restSec": 120
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43ee",
+                "name": "Bent-Over Barbell Row",
+                "sets": 3,
+                "reps": "8-10",
+                "restSec": 120
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43ef",
+                "name": "Seated Cable Row",
+                "sets": 3,
+                "reps": "10-12",
+                "restSec": 90
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43eb",
+                "name": "Face Pull",
+                "sets": 3,
+                "reps": "15",
+                "restSec": 60
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43f0",
+                "name": "Barbell Curl",
+                "sets": 3,
+                "reps": "10-12",
+                "restSec": 60
+              }
+            ]
+          },
+          {
+            "day": 3,
+            "title": "Legs",
+            "exercises": [
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43dd",
+                "name": "Barbell Back Squat",
+                "sets": 4,
+                "reps": "6-8",
+                "restSec": 180
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43df",
+                "name": "Romanian Deadlift",
+                "sets": 3,
+                "reps": "8-10",
+                "restSec": 120
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43e2",
+                "name": "Leg Press",
+                "sets": 3,
+                "reps": "10-12",
+                "restSec": 90
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43e3",
+                "name": "Hip Thrust",
+                "sets": 3,
+                "reps": "10",
+                "restSec": 90
+              },
+              {
+                "exerciseId": "6af8a380b87d2ab69f7e43e4",
+                "name": "Standing Calf Raise",
+                "sets": 4,
+                "reps": "12-15",
+                "restSec": 60
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-09-22T18:30:00.000Z",
+        "updatedAt": "2026-09-22T18:30:00.000Z"
+      }
+    },
+    {
+      "name": "notifications",
+      "type": "collection",
+      "options": {
+        "validator": {
+          "$jsonSchema": {
+            "bsonType": "object",
+            "required": [
+              "userId",
+              "type",
+              "title",
+              "createdAt"
+            ],
+            "properties": {
+              "userId": {
+                "bsonType": "int"
+              },
+              "type": {
+                "enum": [
+                  "renewal_reminder",
+                  "waitlist_promoted",
+                  "class_cancelled",
+                  "pt_update",
+                  "plan_assigned",
+                  "general"
+                ]
+              },
+              "title": {
+                "bsonType": "string"
+              },
+              "message": {
+                "bsonType": "string"
+              },
+              "readAt": {
+                "bsonType": [
+                  "date",
+                  "null"
+                ]
+              },
+              "createdAt": {
+                "bsonType": "date"
+              },
+              "meta": {
+                "bsonType": "object"
+              }
+            }
+          }
+        },
+        "validationLevel": "strict",
+        "validationAction": "error"
+      },
+      "indexes": [
+        {
+          "v": 2,
+          "key": {
+            "_id": 1
+          },
+          "name": "_id_"
+        },
+        {
+          "v": 2,
+          "key": {
+            "userId": 1,
+            "readAt": 1,
+            "createdAt": -1
+          },
+          "name": "user_inbox"
+        },
+        {
+          "v": 2,
+          "key": {
+            "createdAt": 1
+          },
+          "name": "ttl_60_days",
+          "expireAfterSeconds": 5184000
+        }
+      ],
+      "count": 37,
+      "sample": {
+        "_id": "6af8a380b87d2ab69f7e4b1c",
+        "userId": 87,
+        "type": "plan_assigned",
+        "title": "New workout plan: Push Pull Legs Hypertrophy",
+        "message": "Your trainer has created a workout plan for you.",
+        "readAt": "2026-09-22T18:30:00.000Z",
+        "createdAt": "2026-09-22T18:30:00.000Z",
+        "meta": {
+          "planId": "6af8a380b87d2ab69f7e442f"
+        }
+      }
+    }
+  ]
+}
