@@ -39,6 +39,13 @@ export default async function MemberClasses({ searchParams }) {
                 ))}
             </PageHeader>
 
+            {plan?.classes_per_week && plan.used_this_week >= plan.classes_per_week && (
+                <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                    You have used all {plan.classes_per_week} classes of your plan this week. Bookings for next week are open,
+                    and a waitlist spot this week is only given to members who still have classes left.
+                </div>
+            )}
+
             <div className="space-y-6">
                 {byDay.size ? [...byDay].map(([day, list]) => (
                     <Card key={day} title={dateShort(day)}>

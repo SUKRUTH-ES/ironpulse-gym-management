@@ -401,10 +401,16 @@ BEGIN
         UPDATE class_bookings SET status = 'cancelled' WHERE booking_id = p_booking_id;
 
         IF v_status = 'booked' THEN
-            SELECT booking_id, member_id INTO v_next_booking, o_promoted_member_id
-            FROM class_bookings
-            WHERE class_session_id = v_session_id AND status = 'waitlisted'
-            ORDER BY booked_at
+            -- earliest waitlisted member who still has a valid plan that day
+            -- and has not used up the plan's weekly class limit
+            SELECT cb.booking_id, cb.member_id INTO v_next_booking, o_promoted_member_id
+            FROM class_bookings cb
+            JOIN memberships ms ON ms.membership_id = fn_active_membership_id(cb.member_id, DATE(v_starts))
+            JOIN membership_plans p ON p.plan_id = ms.plan_id
+            WHERE cb.class_session_id = v_session_id AND cb.status = 'waitlisted'
+              AND (p.classes_per_week IS NULL
+                   OR fn_classes_booked_in_week(cb.member_id, DATE(v_starts)) < p.classes_per_week)
+            ORDER BY cb.booked_at
             LIMIT 1;
 
             IF v_next_booking IS NOT NULL THEN
