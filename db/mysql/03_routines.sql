@@ -12,6 +12,7 @@ DROP FUNCTION  IF EXISTS fn_member_status;
 DROP FUNCTION  IF EXISTS fn_classes_booked_in_week;
 DROP FUNCTION  IF EXISTS fn_pt_sessions_used;
 DROP PROCEDURE IF EXISTS sp_register_member;
+DROP PROCEDURE IF EXISTS sp_add_trainer;
 DROP PROCEDURE IF EXISTS sp_purchase_membership;
 DROP PROCEDURE IF EXISTS sp_freeze_membership;
 DROP PROCEDURE IF EXISTS sp_unfreeze_membership;
@@ -121,6 +122,34 @@ BEGIN
         INSERT INTO members (user_id, member_code, date_of_birth, gender, fitness_goal)
         VALUES (v_user_id, o_member_code, p_dob, p_gender, COALESCE(p_goal, 'general_fitness'));
         SET o_member_id = LAST_INSERT_ID();
+    COMMIT;
+END$$
+
+-- ---------------------------------------------------------------------
+-- sp_add_trainer: a staff login (users) and its trainer profile in one
+-- transaction, so there is never a trainer user without a profile.
+-- ---------------------------------------------------------------------
+CREATE PROCEDURE sp_add_trainer(
+    IN  p_email VARCHAR(255), IN p_password_hash CHAR(60), IN p_full_name VARCHAR(100),
+    IN  p_phone CHAR(10), IN p_specialization VARCHAR(100), IN p_bio TEXT,
+    IN  p_experience TINYINT UNSIGNED, IN p_rate DECIMAL(8,2),
+    OUT o_trainer_id INT UNSIGNED)
+BEGIN
+    DECLARE v_user_id INT UNSIGNED;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+        INSERT INTO users (email, password_hash, role, full_name, phone)
+        VALUES (LOWER(TRIM(p_email)), p_password_hash, 'trainer', TRIM(p_full_name), p_phone);
+        SET v_user_id = LAST_INSERT_ID();
+
+        INSERT INTO trainers (user_id, specialization, bio, experience_years, session_rate, hired_on)
+        VALUES (v_user_id, TRIM(p_specialization), NULLIF(TRIM(p_bio), ''), p_experience, p_rate, CURRENT_DATE);
+        SET o_trainer_id = LAST_INSERT_ID();
     COMMIT;
 END$$
 

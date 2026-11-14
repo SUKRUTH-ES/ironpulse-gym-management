@@ -1,5 +1,6 @@
 'use server';
 
+import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { requireRole } from '@/lib/auth';
 import { sql, sqlOne, callProcedure, transaction, dbErrorMessage } from '@/lib/db';
@@ -164,5 +165,72 @@ export async function togglePlan(prevState, formData) {
     await requireRole('admin');
     await sql('UPDATE membership_plans SET is_active = NOT is_active WHERE plan_id = ?', [int(formData.get('plan_id'))]);
     revalidatePath('/admin/plans');
+    return { ok: true, message: 'Saved.' };
+}
+
+// ---------------------------------------------------------------- gym setup (rooms, class types, trainers)
+export async function addRoom(prevState, formData) {
+    await requireRole('admin');
+    const name = String(formData.get('name') || '').trim();
+    if (name.length < 2) return { ok: false, message: 'Give the room a name.' };
+    try {
+        await sql('INSERT INTO rooms (name, capacity) VALUES (?, ?)', [name, int(formData.get('capacity'))]);
+        revalidatePath('/admin/setup');
+        return { ok: true, message: `${name} added.` };
+    } catch (err) {
+        if (err.errno === 1062) return { ok: false, message: 'A room with that name already exists.' };
+        if (err.errno === 3819) return { ok: false, message: 'Capacity must be between 1 and 200.' };
+        return fail(err);
+    }
+}
+
+export async function addClassType(prevState, formData) {
+    await requireRole('admin');
+    const f = Object.fromEntries(formData);
+    const name = String(f.name || '').trim();
+    if (name.length < 2) return { ok: false, message: 'Give the class a name.' };
+    try {
+        await sql('INSERT INTO class_types (name, description, intensity, duration_min) VALUES (?, ?, ?, ?)',
+            [name, String(f.description || '').trim() || null, String(f.intensity), int(f.duration_min)]);
+        revalidatePath('/admin/setup');
+        return { ok: true, message: `${name} added. It can now be scheduled on the Classes page.` };
+    } catch (err) {
+        if (err.errno === 1062) return { ok: false, message: 'A class type with that name already exists.' };
+        if (err.errno === 3819) return { ok: false, message: 'Duration must be between 15 and 180 minutes.' };
+        if (err.errno === 1265) return { ok: false, message: 'Pick an intensity.' };
+        return fail(err);
+    }
+}
+
+// The admin sets a first password; it is hashed here and only the hash reaches MySQL.
+export async function addTrainer(prevState, formData) {
+    await requireRole('admin');
+    const f = Object.fromEntries(['full_name', 'email', 'phone', 'specialization', 'bio', 'experience_years', 'session_rate', 'password']
+        .map((k) => [k, String(formData.get(k) || '').trim()]));
+    if (f.full_name.length < 2) return { ok: false, message: 'Enter the trainer\'s full name.' };
+    if (f.phone && !/^[6-9]\d{9}$/.test(f.phone)) return { ok: false, message: 'Enter a 10-digit Indian mobile number.' };
+    if (f.password.length < 8 || !/\d/.test(f.password) || !/[A-Za-z]/.test(f.password)) {
+        return { ok: false, message: 'First password needs at least 8 characters with letters and numbers.' };
+    }
+    try {
+        const hash = await bcrypt.hash(f.password, 12);
+        await callProcedure('sp_add_trainer',
+            [f.email, hash, f.full_name, f.phone || null, f.specialization, f.bio, int(f.experience_years) || 0, Number(f.session_rate)],
+            ['trainer_id']);
+        revalidatePath('/admin/setup');
+        return { ok: true, message: `${f.full_name} can now log in with ${f.email.toLowerCase()}.` };
+    } catch (err) {
+        if (err.errno === 1062 && err.sqlMessage.includes('uq_users_email')) return { ok: false, message: 'An account with this e-mail already exists.' };
+        if (err.errno === 1062 && err.sqlMessage.includes('uq_users_phone')) return { ok: false, message: 'This phone number is already registered.' };
+        if (err.errno === 3819 && err.sqlMessage.includes('chk_users_email')) return { ok: false, message: 'Please enter a valid e-mail address.' };
+        if (err.errno === 3819) return { ok: false, message: 'Rate must be more than 0 and experience at most 50 years.' };
+        return fail(err);
+    }
+}
+
+export async function toggleTrainerPt(prevState, formData) {
+    await requireRole('admin');
+    await sql('UPDATE trainers SET accepts_pt = NOT accepts_pt WHERE trainer_id = ?', [int(formData.get('trainer_id'))]);
+    revalidatePath('/admin/setup');
     return { ok: true, message: 'Saved.' };
 }
