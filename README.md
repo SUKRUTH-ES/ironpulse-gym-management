@@ -48,7 +48,7 @@ All demo accounts use the password **`Gym@12345`**.
 ```
 db/mysql/01_schema.sql    tables, keys, CHECK constraints, indexes, FULLTEXT, ALTER/DROP demo
 db/mysql/02_views.sql     7 views (current memberships, schedule, revenue, churn risk...)
-db/mysql/03_routines.sql  4 functions + 10 stored procedures (all multi-step ones are transactions)
+db/mysql/03_routines.sql  4 functions + 11 stored procedures (all multi-step ones are transactions)
 db/mysql/04_triggers.sql  18 triggers (validation, clash detection, audit log, cascade cancel)
 db/mysql/05_events.sql    scheduled events (expire memberships, close finished classes, expire unanswered PT requests)
 db/mongo/collections.mjs  MongoDB collections, $jsonSchema validators, indexes (text, TTL, time series)
