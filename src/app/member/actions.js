@@ -1,9 +1,10 @@
 'use server';
 
+import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth';
-import { sql, sqlOne, callProcedure, dbErrorMessage } from '@/lib/db';
+import { sql, sqlOne, callProcedure, transaction, dbErrorMessage } from '@/lib/db';
 import { mongo, toObjectId } from '@/lib/mongo';
 import { notify } from '@/lib/notifications';
 import { inr, date, dateTime, plural } from '@/lib/format';
@@ -284,4 +285,52 @@ export async function addCustomExercise(prevState, formData) {
     revalidatePath('/member/exercises');
     revalidatePath('/member/workouts/new');
     return { ok: true, message: `${name} added. You can now use it in your own plans.` };
+}
+
+// ---------------------------------------------------------------- profile
+
+// Phone lives in users, the rest in members: both updates in one transaction.
+// CHECK constraints (phone format, height range, emergency phone) and the
+// UNIQUE phone index are enforced by MySQL.
+export async function updateProfile(prevState, formData) {
+    const me = await requireRole('member');
+    const f = Object.fromEntries(['phone', 'height_cm', 'fitness_goal', 'emergency_contact_name', 'emergency_contact_phone']
+        .map((k) => [k, String(formData.get(k) || '').trim()]));
+    if (!/^[6-9]\d{9}$/.test(f.phone)) return { ok: false, message: 'Enter a 10-digit Indian mobile number.' };
+    if (f.emergency_contact_phone && !/^[6-9]\d{9}$/.test(f.emergency_contact_phone)) return { ok: false, message: 'Emergency contact needs a 10-digit mobile number.' };
+    if (f.emergency_contact_phone && f.emergency_contact_phone === f.phone) return { ok: false, message: 'The emergency contact should be someone else\'s number.' };
+    if (!GOALS.includes(f.fitness_goal)) return { ok: false, message: 'Pick a goal.' };
+    try {
+        await transaction(async (conn) => {
+            await conn.execute('UPDATE users SET phone = ? WHERE user_id = ?', [f.phone, me.user_id]);
+            await conn.execute(
+                `UPDATE members SET height_cm = ?, fitness_goal = ?, emergency_contact_name = ?, emergency_contact_phone = ?
+                 WHERE member_id = ?`,
+                [f.height_cm ? Number(f.height_cm) : null, f.fitness_goal, f.emergency_contact_name || null, f.emergency_contact_phone || null, me.member_id]);
+        });
+        revalidatePath('/member', 'layout');
+        return { ok: true, message: 'Profile saved.' };
+    } catch (err) {
+        if (err.errno === 1062) return { ok: false, message: 'This phone number is already registered to another account.' };
+        if (err.errno === 3819 && err.sqlMessage.includes('height')) return { ok: false, message: 'Height must be between 100 and 250 cm.' };
+        return fail(err);
+    }
+}
+
+export async function changePassword(prevState, formData) {
+    const me = await requireRole('member');
+    const current = String(formData.get('current') || '');
+    const next = String(formData.get('password') || '');
+    if (next.length < 8 || !/\d/.test(next) || !/[A-Za-z]/.test(next)) {
+        return { ok: false, message: 'New password needs at least 8 characters with letters and numbers.' };
+    }
+    if (next !== String(formData.get('confirm') || '')) return { ok: false, message: 'The two new passwords do not match.' };
+    if (next === current) return { ok: false, message: 'Choose a password different from the current one.' };
+
+    const row = await sqlOne('SELECT password_hash FROM users WHERE user_id = ?', [me.user_id]);
+    if (!(await bcrypt.compare(current, row.password_hash))) return { ok: false, message: 'Current password is wrong.' };
+    // trg_users_bu records password_changed_at
+    await sql('UPDATE users SET password_hash = ? WHERE user_id = ?', [await bcrypt.hash(next, 12), me.user_id]);
+    revalidatePath('/member/profile');
+    return { ok: true, message: 'Password changed.' };
 }

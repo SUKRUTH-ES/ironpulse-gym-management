@@ -60,6 +60,9 @@ CREATE TRIGGER trg_users_bu BEFORE UPDATE ON users FOR EACH ROW
 BEGIN
     SET NEW.email = LOWER(TRIM(NEW.email));
     SET NEW.full_name = TRIM(NEW.full_name);
+    IF NEW.password_hash <> OLD.password_hash THEN
+        SET NEW.password_changed_at = NOW();
+    END IF;
 END$$
 
 -- ---------------------------------------------------------------------
