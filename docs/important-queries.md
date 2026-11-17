@@ -1,6 +1,6 @@
 # IronPulse — Important Queries
 
-_Every query below is copied from the application code or the `db/` scripts, and every output table was produced by running it on the demo database with `node docs/tools/run-queries.mjs` (generated 2026-11-14). Long results are cut to the first rows._
+_Every query below is copied from the application code or the `db/` scripts, and every output table was produced by running it on the demo database with `node docs/tools/run-queries.mjs` (generated 2026-11-17). Long results are cut to the first rows._
 
 ## 1. SQL queries (MySQL `gym_db`)
 
@@ -22,7 +22,7 @@ ORDER BY revenue DESC;
 
 | name | sold | revenue |
 |---|---|---|
-| Quarterly | 68 | 442000.00 |
+| Quarterly | 67 | 435500.00 |
 | Monthly Plus | 86 | 215000.00 |
 | Half-Yearly | 13 | 149500.00 |
 | Monthly Basic | 93 | 139500.00 |
@@ -54,12 +54,12 @@ ORDER BY avg_fill_pct DESC;
 
 | name | sessions | avg_fill_pct | no_show_pct |
 |---|---|---|---|
-| Zumba | 36 | 76.7 | 8.0 |
-| Spin Cycle | 35 | 75.4 | 13.1 |
-| CrossFit WOD | 36 | 70.9 | 12.3 |
-| HIIT Blast | 36 | 67.7 | 10.7 |
-| Yoga Flow | 36 | 60.4 | 8.5 |
-| Strength Circuit | 27 | 58.6 | 11.1 |
+| Zumba | 37 | 77.1 | 10.9 |
+| Spin Cycle | 36 | 75.9 | 16.1 |
+| CrossFit WOD | 37 | 71.5 | 16.0 |
+| HIIT Blast | 37 | 67.9 | 13.3 |
+| Yoga Flow | 37 | 60.4 | 11.0 |
+| Strength Circuit | 28 | 58.6 | 14.2 |
 | Power Yoga | 17 | 57.6 | 10.2 |
 | Boxing Fit | 18 | 54.1 | 8.9 |
 
@@ -86,16 +86,16 @@ ORDER BY position, full_name;
 
 | member_id | full_name | visits | position |
 |---|---|---|---|
-| 55 | Isha Iyer | 28 | 1 |
-| 77 | Pranav Verma | 28 | 1 |
-| 74 | Ananya Gupta | 27 | 3 |
-| 45 | Kunal Joshi | 27 | 3 |
-| 78 | Priya Nair | 27 | 3 |
-| 61 | Aarav Hegde | 26 | 6 |
-| 47 | Gaurav Hegde | 26 | 6 |
-| 58 | Neha Reddy | 26 | 6 |
+| 78 | Priya Nair | 26 | 1 |
+| 74 | Ananya Gupta | 25 | 2 |
+| 55 | Isha Iyer | 25 | 2 |
+| 77 | Pranav Verma | 25 | 2 |
+| 45 | Kunal Joshi | 24 | 5 |
+| 58 | Neha Reddy | 24 | 5 |
+| 50 | Ritu Chatterjee | 24 | 5 |
+| 46 | Shaurya Nair | 24 | 5 |
 
-_…10 more rows (18 total)_
+_…6 more rows (14 total)_
 
 ### Q4. Active members who never booked a class
 
@@ -160,8 +160,8 @@ LEFT JOIN v_current_memberships cm ON cm.member_id = m.member_id;
 | GM000008 | Reyansh Gupta | 54 | NULL | NULL | none | NULL |
 | GM000009 | Alex Sharma | 42 | NULL | NULL | none | NULL |
 | GM000010 | Saanvi Rao | 47 | NULL | NULL | none | NULL |
-| GM000011 | Kiara Mishra | 18 | Monthly Basic | 0 | active | 2026-11-13 19:24:00 |
-| GM000012 | Nandini Kulkarni | 54 | Monthly Plus | 6 | active | 2026-11-13 06:23:00 |
+| GM000011 | Kiara Mishra | 18 | NULL | NULL | expired | 2026-11-13 19:24:00 |
+| GM000012 | Nandini Kulkarni | 54 | Monthly Plus | 3 | active | 2026-11-13 06:23:00 |
 
 ### Q7. Churn risk (view `v_churn_risk`)
 
@@ -178,14 +178,14 @@ LIMIT 8;
 
 | member_code | full_name | plan_name | visits_prev_30 | visits_last_30 | days_since_last_visit |
 |---|---|---|---|---|---|
-| GM000040 | Rahul Kumar | Monthly Plus | 24 | 1 | 1 |
-| GM000041 | Mohit Desai | Monthly Basic | 22 | 2 | 18 |
-| GM000042 | Varun Sharma | Monthly Plus | 25 | 3 | 7 |
-| GM000046 | Siddharth Sharma | Monthly Plus | 22 | 3 | 1 |
-| GM000044 | Tejas Kumar | Monthly Basic | 21 | 3 | 8 |
-| GM000039 | Varun Kumar | Quarterly | 21 | 3 | 15 |
-| GM000038 | Krishna Reddy | Quarterly | 24 | 4 | 9 |
-| GM000035 | Shruti Kulkarni | Monthly Plus | 19 | 4 | 0 |
+| GM000040 | Rahul Kumar | Monthly Plus | 22 | 1 | 4 |
+| GM000041 | Mohit Desai | Monthly Basic | 21 | 2 | 21 |
+| GM000042 | Varun Sharma | Monthly Plus | 22 | 3 | 10 |
+| GM000046 | Siddharth Sharma | Monthly Plus | 22 | 3 | 4 |
+| GM000044 | Tejas Kumar | Monthly Basic | 20 | 3 | 11 |
+| GM000039 | Varun Kumar | Quarterly | 19 | 3 | 18 |
+| GM000035 | Shruti Kulkarni | Monthly Plus | 17 | 3 | 3 |
+| GM000038 | Krishna Reddy | Quarterly | 21 | 4 | 12 |
 
 ### Q8. Monthly revenue (view `v_monthly_revenue`)
 
@@ -208,7 +208,7 @@ SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 6;
 
 ### Q9. Stored function `fn_member_status` used inside a query
 
-**Shows:** user-defined function in SELECT and in GROUP BY. Front desk and member pages call the same function, so the "is this member allowed in?" rule exists only once.
+**Shows:** user-defined function in SELECT and in GROUP BY. A stored function can be used anywhere an expression is allowed; here it groups every member by current membership status (active / frozen / expired / none). This query is a demonstration in this document: the application pages use the related function `fn_active_membership_id`, which `sp_book_class`, `sp_cancel_class_booking` and `sp_book_pt_session` call to find the membership valid on a given day.
 
 ```sql
 SELECT fn_member_status(member_id) AS status, COUNT(*) AS members
@@ -221,8 +221,8 @@ ORDER BY members DESC;
 
 | status | members |
 |---|---|
-| active | 88 |
-| expired | 15 |
+| active | 86 |
+| expired | 17 |
 | none | 4 |
 | frozen | 3 |
 
@@ -387,7 +387,7 @@ WHERE member_id = ? AND check_in >= CURRENT_DATE - INTERVAL 30 DAY;
 
 | table | type | possible_keys | key | key_len | rows | Extra |
 |---|---|---|---|---|---|---|
-| attendance | range | idx_attendance_member, idx_attendance_check_in | idx_attendance_member | 9 | 26 | Using index condition |
+| attendance | range | idx_attendance_member, idx_attendance_check_in | idx_attendance_member | 9 | 24 | Using index condition |
 
 ## 2. Integrity enforced by the database
 
@@ -432,7 +432,7 @@ db.workout_logs.aggregate([
 
 | volume | week | workouts | avgRpe |
 |---|---|---|---|
-| 15440 | 2026-09-20 | 5 | 6.8 |
+| 13257.5 | 2026-09-20 | 4 | 7 |
 | 20040 | 2026-09-27 | 5 | 7.2 |
 | 20425 | 2026-10-04 | 5 | 7.6 |
 | 13530 | 2026-10-11 | 4 | 7 |
@@ -514,12 +514,12 @@ db.workout_logs.aggregate([
 
 | times | exercise | members |
 |---|---|---|
-| 168 | Face Pull | 28 |
-| 167 | Plank | 31 |
-| 139 | Incline Dumbbell Press | 29 |
-| 138 | Dead Bug | 26 |
-| 106 | Walking Lunge | 21 |
-| 99 | Romanian Deadlift | 20 |
+| 156 | Face Pull | 28 |
+| 155 | Plank | 31 |
+| 129 | Incline Dumbbell Press | 29 |
+| 128 | Dead Bug | 26 |
+| 99 | Walking Lunge | 21 |
+| 94 | Romanian Deadlift | 20 |
 
 ### Q19. Body-weight trend from the time-series collection
 

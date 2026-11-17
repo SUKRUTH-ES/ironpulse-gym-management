@@ -49,7 +49,7 @@ table.rubric td:first-child { width: 18pt; text-align: center; }
 <p class="subtitle">Gym Management System using MySQL, MongoDB and Next.js</p>
 <table class="team"><thead><tr><th>Student name</th><th>SRN</th></tr></thead><tbody><tr><td>SUKRUTH ES</td><td>PES1UG24CS160</td></tr><tr><td>Gagan Eswar</td><td>PES1UG24CS165</td></tr></tbody></table>
 <p class="meta">Course: Database Management Systems · Section C<br>Instructor: Dr. Nagasundari S<br>
-Department of Computer Science and Engineering, PES University<br>14 November 2026</p>
+Department of Computer Science and Engineering, PES University<br>17 November 2026</p>
 <p class="meta">Source code: <a href="https://github.com/SUKRUTH-ES/ironpulse-gym-management">https://github.com/SUKRUTH-ES/ironpulse-gym-management</a></p>
 </section><section class="toc"><h1>Contents</h1><ol class="toc"><li>1. Title</li><li>2. Students SRN and Name</li><li><a href="#abstract">3. Abstract</a></li><li><a href="#stack">4. Tech Stack</a></li><li><a href="#sql">5. SQL — Database Commands (MySQL)</a></li><li><a href="#nosql">6. NoSQL Database Commands (MongoDB)</a></li><li><a href="#tree">7. Next.js — Project Tree Structure</a></li><li><a href="#screenshots">8. Sample Screenshots — Application Code and Demo</a></li><li><a href="#rubric">9. Evaluation Rubrics — Completion Status</a></li></ol></section><section id="abstract"><h1>3. Abstract</h1>
 <p>Small and mid-sized gyms still run on registers, spreadsheets and chat groups. As they grow, memberships lapse
@@ -230,7 +230,7 @@ WHERE pay.status = &#x27;completed&#x27; AND pay.paid_at &gt;= CURRENT_DATE - IN
 GROUP BY p.plan_id, p.name
 ORDER BY revenue DESC;</code></pre>
 <p><strong>Output</strong> (run as <code>gym_app</code>):</p>
-<table><thead><tr><th>name</th><th>sold</th><th>revenue</th></tr></thead><tbody><tr><td>Quarterly</td><td>68</td><td>442000.00</td></tr><tr><td>Monthly Plus</td><td>86</td><td>215000.00</td></tr><tr><td>Half-Yearly</td><td>13</td><td>149500.00</td></tr><tr><td>Monthly Basic</td><td>93</td><td>139500.00</td></tr><tr><td>Summer Shred 2026</td><td>8</td><td>31992.00</td></tr><tr><td>Annual</td><td>1</td><td>19999.00</td></tr></tbody></table><h4>Q2. Class popularity — only class types with 5+ finished sessions</h4>
+<table><thead><tr><th>name</th><th>sold</th><th>revenue</th></tr></thead><tbody><tr><td>Quarterly</td><td>67</td><td>435500.00</td></tr><tr><td>Monthly Plus</td><td>86</td><td>215000.00</td></tr><tr><td>Half-Yearly</td><td>13</td><td>149500.00</td></tr><tr><td>Monthly Basic</td><td>93</td><td>139500.00</td></tr><tr><td>Summer Shred 2026</td><td>8</td><td>31992.00</td></tr><tr><td>Annual</td><td>1</td><td>19999.00</td></tr></tbody></table><h4>Q2. Class popularity — only class types with 5+ finished sessions</h4>
 <p><strong>Shows:</strong> derived table (subquery in FROM), conditional SUM, AVG, NULLIF, GROUP BY + HAVING. Reports page. The derived table counts seats used per session; HAVING filters groups after aggregation.</p>
 <pre class="code sql"><code>SELECT ct.name, COUNT(DISTINCT cs.class_session_id) AS sessions,
        ROUND(AVG(fill.booked / cs.capacity) * 100, 1) AS avg_fill_pct,
@@ -247,7 +247,7 @@ GROUP BY ct.class_type_id, ct.name
 HAVING COUNT(DISTINCT cs.class_session_id) &gt;= 5
 ORDER BY avg_fill_pct DESC;</code></pre>
 <p><strong>Output</strong> (run as <code>gym_app</code>):</p>
-<table><thead><tr><th>name</th><th>sessions</th><th>avg_fill_pct</th><th>no_show_pct</th></tr></thead><tbody><tr><td>Zumba</td><td>36</td><td>76.7</td><td>8.0</td></tr><tr><td>Spin Cycle</td><td>35</td><td>75.4</td><td>13.1</td></tr><tr><td>CrossFit WOD</td><td>36</td><td>70.9</td><td>12.3</td></tr><tr><td>HIIT Blast</td><td>36</td><td>67.7</td><td>10.7</td></tr><tr><td>Yoga Flow</td><td>36</td><td>60.4</td><td>8.5</td></tr><tr><td>Strength Circuit</td><td>27</td><td>58.6</td><td>11.1</td></tr><tr><td>Power Yoga</td><td>17</td><td>57.6</td><td>10.2</td></tr><tr><td>Boxing Fit</td><td>18</td><td>54.1</td><td>8.9</td></tr></tbody></table>
+<table><thead><tr><th>name</th><th>sessions</th><th>avg_fill_pct</th><th>no_show_pct</th></tr></thead><tbody><tr><td>Zumba</td><td>37</td><td>77.1</td><td>10.9</td></tr><tr><td>Spin Cycle</td><td>36</td><td>75.9</td><td>16.1</td></tr><tr><td>CrossFit WOD</td><td>37</td><td>71.5</td><td>16.0</td></tr><tr><td>HIIT Blast</td><td>37</td><td>67.9</td><td>13.3</td></tr><tr><td>Yoga Flow</td><td>37</td><td>60.4</td><td>11.0</td></tr><tr><td>Strength Circuit</td><td>28</td><td>58.6</td><td>14.2</td></tr><tr><td>Power Yoga</td><td>17</td><td>57.6</td><td>10.2</td></tr><tr><td>Boxing Fit</td><td>18</td><td>54.1</td><td>8.9</td></tr></tbody></table>
 <p><em>…2 more rows (10 total)</em></p><h4>Q3. Top 10 most consistent members (last 30 days)</h4>
 <p><strong>Shows:</strong> window function RANK() OVER, subquery in FROM, GROUP BY. Reports page. Members with the same number of visits share a rank.</p>
 <pre class="code sql"><code>SELECT * FROM (
@@ -261,8 +261,8 @@ ORDER BY avg_fill_pct DESC;</code></pre>
 WHERE position &lt;= 10
 ORDER BY position, full_name;</code></pre>
 <p><strong>Output</strong> (run as <code>gym_app</code>):</p>
-<table><thead><tr><th>member_id</th><th>full_name</th><th>visits</th><th>position</th></tr></thead><tbody><tr><td>55</td><td>Isha Iyer</td><td>28</td><td>1</td></tr><tr><td>77</td><td>Pranav Verma</td><td>28</td><td>1</td></tr><tr><td>74</td><td>Ananya Gupta</td><td>27</td><td>3</td></tr><tr><td>45</td><td>Kunal Joshi</td><td>27</td><td>3</td></tr><tr><td>78</td><td>Priya Nair</td><td>27</td><td>3</td></tr><tr><td>61</td><td>Aarav Hegde</td><td>26</td><td>6</td></tr><tr><td>47</td><td>Gaurav Hegde</td><td>26</td><td>6</td></tr><tr><td>58</td><td>Neha Reddy</td><td>26</td><td>6</td></tr></tbody></table>
-<p><em>…10 more rows (18 total)</em></p><h4>Q4. Active members who never booked a class</h4>
+<table><thead><tr><th>member_id</th><th>full_name</th><th>visits</th><th>position</th></tr></thead><tbody><tr><td>78</td><td>Priya Nair</td><td>26</td><td>1</td></tr><tr><td>74</td><td>Ananya Gupta</td><td>25</td><td>2</td></tr><tr><td>55</td><td>Isha Iyer</td><td>25</td><td>2</td></tr><tr><td>77</td><td>Pranav Verma</td><td>25</td><td>2</td></tr><tr><td>45</td><td>Kunal Joshi</td><td>24</td><td>5</td></tr><tr><td>58</td><td>Neha Reddy</td><td>24</td><td>5</td></tr><tr><td>50</td><td>Ritu Chatterjee</td><td>24</td><td>5</td></tr><tr><td>46</td><td>Shaurya Nair</td><td>24</td><td>5</td></tr></tbody></table>
+<p><em>…6 more rows (14 total)</em></p><h4>Q4. Active members who never booked a class</h4>
 <p><strong>Shows:</strong> correlated NOT EXISTS subquery on a view. Reports page — a list for the front desk to follow up.</p>
 <pre class="code sql"><code>SELECT mo.member_id, mo.full_name, mo.plan_name, mo.joined_on
 FROM v_member_overview mo
@@ -298,14 +298,14 @@ FROM members m
 JOIN users u ON u.user_id = m.user_id
 LEFT JOIN v_current_memberships cm ON cm.member_id = m.member_id;</code></pre>
 <p><strong>Output</strong> of <code>SELECT member_code, full_name, age, plan_name, days_left, membership_status, last_visit FROM v_member_overview ORDER BY member_id LIMIT 6</code>:</p>
-<table><thead><tr><th>member_code</th><th>full_name</th><th>age</th><th>plan_name</th><th>days_left</th><th>membership_status</th><th>last_visit</th></tr></thead><tbody><tr><td>GM000007</td><td>Abhishek Kulkarni</td><td>49</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000008</td><td>Reyansh Gupta</td><td>54</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000009</td><td>Alex Sharma</td><td>42</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000010</td><td>Saanvi Rao</td><td>47</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000011</td><td>Kiara Mishra</td><td>18</td><td>Monthly Basic</td><td>0</td><td>active</td><td>2026-11-13 19:24:00</td></tr><tr><td>GM000012</td><td>Nandini Kulkarni</td><td>54</td><td>Monthly Plus</td><td>6</td><td>active</td><td>2026-11-13 06:23:00</td></tr></tbody></table><h4>Q7. Churn risk (view <code>v_churn_risk</code>)</h4>
+<table><thead><tr><th>member_code</th><th>full_name</th><th>age</th><th>plan_name</th><th>days_left</th><th>membership_status</th><th>last_visit</th></tr></thead><tbody><tr><td>GM000007</td><td>Abhishek Kulkarni</td><td>49</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000008</td><td>Reyansh Gupta</td><td>54</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000009</td><td>Alex Sharma</td><td>42</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000010</td><td>Saanvi Rao</td><td>47</td><td>NULL</td><td>NULL</td><td>none</td><td>NULL</td></tr><tr><td>GM000011</td><td>Kiara Mishra</td><td>18</td><td>NULL</td><td>NULL</td><td>expired</td><td>2026-11-13 19:24:00</td></tr><tr><td>GM000012</td><td>Nandini Kulkarni</td><td>54</td><td>Monthly Plus</td><td>3</td><td>active</td><td>2026-11-13 06:23:00</td></tr></tbody></table><h4>Q7. Churn risk (view <code>v_churn_risk</code>)</h4>
 <p><strong>Shows:</strong> view on top of a view, derived table with conditional SUM over two 30-day windows; queried like a table. Admin Reports: members whose visits in the last 30 days dropped below half of the 30 days before.</p>
 <pre class="code sql"><code>SELECT member_code, full_name, plan_name, visits_prev_30, visits_last_30, days_since_last_visit
 FROM v_churn_risk
 ORDER BY visits_last_30 / visits_prev_30
 LIMIT 8;</code></pre>
 <p><strong>Output</strong> (run as <code>gym_app</code>):</p>
-<table><thead><tr><th>member_code</th><th>full_name</th><th>plan_name</th><th>visits_prev_30</th><th>visits_last_30</th><th>days_since_last_visit</th></tr></thead><tbody><tr><td>GM000040</td><td>Rahul Kumar</td><td>Monthly Plus</td><td>24</td><td>1</td><td>1</td></tr><tr><td>GM000041</td><td>Mohit Desai</td><td>Monthly Basic</td><td>22</td><td>2</td><td>18</td></tr><tr><td>GM000042</td><td>Varun Sharma</td><td>Monthly Plus</td><td>25</td><td>3</td><td>7</td></tr><tr><td>GM000046</td><td>Siddharth Sharma</td><td>Monthly Plus</td><td>22</td><td>3</td><td>1</td></tr><tr><td>GM000044</td><td>Tejas Kumar</td><td>Monthly Basic</td><td>21</td><td>3</td><td>8</td></tr><tr><td>GM000039</td><td>Varun Kumar</td><td>Quarterly</td><td>21</td><td>3</td><td>15</td></tr><tr><td>GM000038</td><td>Krishna Reddy</td><td>Quarterly</td><td>24</td><td>4</td><td>9</td></tr><tr><td>GM000035</td><td>Shruti Kulkarni</td><td>Monthly Plus</td><td>19</td><td>4</td><td>0</td></tr></tbody></table>
+<table><thead><tr><th>member_code</th><th>full_name</th><th>plan_name</th><th>visits_prev_30</th><th>visits_last_30</th><th>days_since_last_visit</th></tr></thead><tbody><tr><td>GM000040</td><td>Rahul Kumar</td><td>Monthly Plus</td><td>22</td><td>1</td><td>4</td></tr><tr><td>GM000041</td><td>Mohit Desai</td><td>Monthly Basic</td><td>21</td><td>2</td><td>21</td></tr><tr><td>GM000042</td><td>Varun Sharma</td><td>Monthly Plus</td><td>22</td><td>3</td><td>10</td></tr><tr><td>GM000046</td><td>Siddharth Sharma</td><td>Monthly Plus</td><td>22</td><td>3</td><td>4</td></tr><tr><td>GM000044</td><td>Tejas Kumar</td><td>Monthly Basic</td><td>20</td><td>3</td><td>11</td></tr><tr><td>GM000039</td><td>Varun Kumar</td><td>Quarterly</td><td>19</td><td>3</td><td>18</td></tr><tr><td>GM000035</td><td>Shruti Kulkarni</td><td>Monthly Plus</td><td>17</td><td>3</td><td>3</td></tr><tr><td>GM000038</td><td>Krishna Reddy</td><td>Quarterly</td><td>21</td><td>4</td><td>12</td></tr></tbody></table>
 
 <h2>5.6 Functions and stored procedures (with transactions)</h2>
 <div class="codetitle">Stored function fn_member_status (03_routines.sql)</div><pre class="code"><code>CREATE FUNCTION fn_member_status(p_member_id INT UNSIGNED)
@@ -328,13 +328,13 @@ BEGIN
     RETURN &#x27;none&#x27;;
 END$$</code></pre>
 <h4>Q9. Stored function <code>fn_member_status</code> used inside a query</h4>
-<p><strong>Shows:</strong> user-defined function in SELECT and in GROUP BY. Front desk and member pages call the same function, so the "is this member allowed in?" rule exists only once.</p>
+<p><strong>Shows:</strong> user-defined function in SELECT and in GROUP BY. A stored function can be used anywhere an expression is allowed; here it groups every member by current membership status (active / frozen / expired / none). This query is a demonstration in this document: the application pages use the related function <code>fn_active_membership_id</code>, which <code>sp_book_class</code>, <code>sp_cancel_class_booking</code> and <code>sp_book_pt_session</code> call to find the membership valid on a given day.</p>
 <pre class="code sql"><code>SELECT fn_member_status(member_id) AS status, COUNT(*) AS members
 FROM members
 GROUP BY status
 ORDER BY members DESC;</code></pre>
 <p><strong>Output</strong> (run as <code>gym_app</code>):</p>
-<table><thead><tr><th>status</th><th>members</th></tr></thead><tbody><tr><td>active</td><td>88</td></tr><tr><td>expired</td><td>15</td></tr><tr><td>none</td><td>4</td></tr><tr><td>frozen</td><td>3</td></tr></tbody></table>
+<table><thead><tr><th>status</th><th>members</th></tr></thead><tbody><tr><td>active</td><td>86</td></tr><tr><td>expired</td><td>17</td></tr><tr><td>none</td><td>4</td></tr><tr><td>frozen</td><td>3</td></tr></tbody></table>
 <div class="codetitle">Stored procedure sp_purchase_membership — transaction, row lock, renewal queued after the current plan</div><pre class="code"><code>CREATE PROCEDURE sp_purchase_membership(
     IN  p_member_id INT UNSIGNED, IN p_plan_id SMALLINT UNSIGNED,
     IN  p_method VARCHAR(12), IN p_recorded_by INT UNSIGNED,
@@ -543,7 +543,7 @@ CREATE EVENT ev_class_housekeeping
 FROM attendance
 WHERE member_id = ? AND check_in &gt;= CURRENT_DATE - INTERVAL 30 DAY;</code></pre>
 <p><strong>Output</strong> (run as <code>gym_app</code>, parameters [58]):</p>
-<table><thead><tr><th>table</th><th>type</th><th>possible_keys</th><th>key</th><th>key_len</th><th>rows</th><th>Extra</th></tr></thead><tbody><tr><td>attendance</td><td>range</td><td>idx_attendance_member, idx_attendance_check_in</td><td>idx_attendance_member</td><td>9</td><td>26</td><td>Using index condition</td></tr></tbody></table>
+<table><thead><tr><th>table</th><th>type</th><th>possible_keys</th><th>key</th><th>key_len</th><th>rows</th><th>Extra</th></tr></thead><tbody><tr><td>attendance</td><td>range</td><td>idx_attendance_member, idx_attendance_check_in</td><td>idx_attendance_member</td><td>9</td><td>24</td><td>Using index condition</td></tr></tbody></table>
 
 <h2>5.10 Integrity enforced by the database</h2>
 
@@ -660,7 +660,7 @@ db.workout_plans.find({ memberId: 55 }, { &quot;days.exercises&quot;: 0 }).sort(
   { $sort: { _id: 1 } }
 ])</code></pre>
 <p><strong>Output:</strong></p>
-<table><thead><tr><th>volume</th><th>week</th><th>workouts</th><th>avgRpe</th></tr></thead><tbody><tr><td>15440</td><td>2026-09-20</td><td>5</td><td>6.8</td></tr><tr><td>20040</td><td>2026-09-27</td><td>5</td><td>7.2</td></tr><tr><td>20425</td><td>2026-10-04</td><td>5</td><td>7.6</td></tr><tr><td>13530</td><td>2026-10-11</td><td>4</td><td>7</td></tr><tr><td>17792.5</td><td>2026-10-18</td><td>4</td><td>7.7</td></tr><tr><td>23465</td><td>2026-10-25</td><td>6</td><td>7.5</td></tr><tr><td>19087.5</td><td>2026-11-01</td><td>4</td><td>5.7</td></tr><tr><td>22332.5</td><td>2026-11-08</td><td>5</td><td>6.2</td></tr></tbody></table><h4>Q16. Personal records (heaviest set per exercise)</h4>
+<table><thead><tr><th>volume</th><th>week</th><th>workouts</th><th>avgRpe</th></tr></thead><tbody><tr><td>13257.5</td><td>2026-09-20</td><td>4</td><td>7</td></tr><tr><td>20040</td><td>2026-09-27</td><td>5</td><td>7.2</td></tr><tr><td>20425</td><td>2026-10-04</td><td>5</td><td>7.6</td></tr><tr><td>13530</td><td>2026-10-11</td><td>4</td><td>7</td></tr><tr><td>17792.5</td><td>2026-10-18</td><td>4</td><td>7.7</td></tr><tr><td>23465</td><td>2026-10-25</td><td>6</td><td>7.5</td></tr><tr><td>19087.5</td><td>2026-11-01</td><td>4</td><td>5.7</td></tr><tr><td>22332.5</td><td>2026-11-08</td><td>5</td><td>6.2</td></tr></tbody></table><h4>Q16. Personal records (heaviest set per exercise)</h4>
 <p><strong>Shows:</strong> $unwind, $match on nested field, $sort, $group with $first, $limit. Workouts page "Personal records" card. Sorting before <code>$group</code> lets <code>$first</code> pick the heaviest set and the date it happened.</p>
 <pre class="code js"><code>db.workout_logs.aggregate([
   { $match: { memberId: 58 } },
@@ -685,7 +685,7 @@ db.workout_plans.find({ memberId: 55 }, { &quot;days.exercises&quot;: 0 }).sort(
   { $limit: 6 }
 ])</code></pre>
 <p><strong>Output:</strong></p>
-<table><thead><tr><th>times</th><th>exercise</th><th>members</th></tr></thead><tbody><tr><td>168</td><td>Face Pull</td><td>28</td></tr><tr><td>167</td><td>Plank</td><td>31</td></tr><tr><td>139</td><td>Incline Dumbbell Press</td><td>29</td></tr><tr><td>138</td><td>Dead Bug</td><td>26</td></tr><tr><td>106</td><td>Walking Lunge</td><td>21</td></tr><tr><td>99</td><td>Romanian Deadlift</td><td>20</td></tr></tbody></table><h4>Q19. Body-weight trend from the time-series collection</h4>
+<table><thead><tr><th>times</th><th>exercise</th><th>members</th></tr></thead><tbody><tr><td>156</td><td>Face Pull</td><td>28</td></tr><tr><td>155</td><td>Plank</td><td>31</td></tr><tr><td>129</td><td>Incline Dumbbell Press</td><td>29</td></tr><tr><td>128</td><td>Dead Bug</td><td>26</td></tr><tr><td>99</td><td>Walking Lunge</td><td>21</td></tr><tr><td>94</td><td>Romanian Deadlift</td><td>20</td></tr></tbody></table><h4>Q19. Body-weight trend from the time-series collection</h4>
 <p><strong>Shows:</strong> time-series collection, $group by $dateTrunc, $avg, $min/$max. Workouts page weight chart: one average per week, read from the <code>body_metrics</code> time-series collection.</p>
 <pre class="code js"><code>db.body_metrics.aggregate([
   { $match: { memberId: 58 } },

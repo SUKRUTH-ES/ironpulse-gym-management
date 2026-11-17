@@ -183,7 +183,7 @@ await sqlQuery('Monthly revenue (view `v_monthly_revenue`)',
     `SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 6;`);
 
 await sqlQuery('Stored function `fn_member_status` used inside a query',
-    'Front desk and member pages call the same function, so the "is this member allowed in?" rule exists only once.',
+    'A stored function can be used anywhere an expression is allowed; here it groups every member by current membership status (active / frozen / expired / none). This query is a demonstration in this document: the application pages use the related function `fn_active_membership_id`, which `sp_book_class`, `sp_cancel_class_booking` and `sp_book_pt_session` call to find the membership valid on a given day.',
     'user-defined function in SELECT and in GROUP BY',
     `SELECT fn_member_status(member_id) AS status, COUNT(*) AS members
 FROM members
